@@ -22,6 +22,7 @@ The built app has a few command-line flags that don't read the screen:
 |---|---|
 | `--diagnostics` | Reports whether the on-device model and the bundled engine are ready, and the permission status |
 | `--model-check` | Also makes one real on-device model request, using made-up controls |
+| `--export-hero <file.png>` | Draws the README and website header image |
 | `--export-character-sheet <file.png>` | Draws every expression of the character |
 | `--export-theme-preview <path>` | Draws a sample card in light and dark (`<path>-light.png`, `<path>-dark.png`) |
 | `--export-icon <folder>` | Writes the app icon set |

@@ -16,3 +16,4 @@ All notable changes to Nudge are listed here. The format follows [Keep a Changel
 - Read-aloud with pause and stop, synthesized sound effects, and Space to move through a guide.
 - Appearance settings: card style and color, fonts, text size, highlight color and thickness, glow, dimming and the character's size, with a live preview.
 - A welcome tour of Nudge's own settings on first launch.
+- A website at https://ezra-black.github.io/nudge/, in Nudge's theme.

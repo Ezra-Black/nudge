@@ -26,7 +26,7 @@ You're welcome to fork Nudge and publish your own version under the Apache Licen
 
 1. **Choose a new name.** Change `CFBundleName`, `CFBundleDisplayName` and `CFBundleIdentifier` in [`Resources/Info.plist`](Resources/Info.plist), and the name in the app's text.
 2. **Replace the character.** Delete [`Sources/Nudge/Brand/`](Sources/Nudge/Brand/) and write your own `MascotView` and `MascotArt`. [`Sources/Nudge/Brand/README.md`](Sources/Nudge/Brand/README.md) lists exactly what the rest of the app expects, and a plain SF Symbol is enough to get started.
-3. **Remove the brand artwork**: [`docs/images/`](docs/images/) and [`marketing/`](marketing/).
+3. **Remove the brand artwork and website**: [`docs/images/`](docs/images/), [`marketing/`](marketing/) and [`site/`](site/).
 4. **Keep the notices.** The Apache License asks you to keep [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE), and to say that you changed the files.
 
 You may say your fork is "based on Nudge", as long as it's clear that it isn't Nudge and isn't made or endorsed by Ezra Black.

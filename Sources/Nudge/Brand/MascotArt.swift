@@ -48,7 +48,7 @@ enum MascotArt {
         let preview = VStack(alignment: .leading, spacing: 30) {
             NudgeBanner(mood: .waving).frame(width: 620)
             HStack(alignment: .top, spacing: 30) {
-                GuideCard(content: sample, icon: NSImage(named: NSImage.applicationIconName))
+                GuideCard(content: sample, icon: nil)
                     .background { CardBackdrop(look: look, embedded: true) }
                 MascotView(mood: .pointing, size: 60, pointing: .pi, animated: false)
             }
@@ -60,7 +60,35 @@ enum MascotArt {
                 startPoint: .top, endPoint: .bottom)
         )
         .environment(\.colorScheme, dark ? .dark : .light)
+        .environment(\.isSnapshot, true)
         let renderer = ImageRenderer(content: preview)
+        renderer.scale = 2
+        guard let image = renderer.cgImage, let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else {
+            return
+        }
+        try data.write(to: file)
+    }
+    /// Writes the header image for the README and website: the app icon, with Nudge peeking happily over it from behind.
+    /// The background is transparent with a soft glow, so it sits well on light and dark pages.
+    @MainActor static func exportHero(to file: URL) throws {
+        let hero = ZStack {
+            // A gradient rather than a blur, so the glow fades out cleanly on any page.
+            Ellipse()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "#A98BFF").opacity(0.5), Color(hex: "#A98BFF").opacity(0.18), Color(hex: "#A98BFF").opacity(0),
+                        ],
+                        center: .center, startRadius: 0, endRadius: 380)
+                )
+                .frame(width: 980, height: 800)
+                .offset(y: 120)
+            MascotView(mood: .cheery, size: 360, animated: false).offset(y: -70)
+            AppIconArt().scaleEffect(0.5).frame(width: 512, height: 512).offset(y: 230)
+        }
+        // Room on every side for Nudge's own glow to fade out before the edge.
+        .frame(width: 1080, height: 1060)
+        let renderer = ImageRenderer(content: hero)
         renderer.scale = 2
         guard let image = renderer.cgImage, let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else {
             return

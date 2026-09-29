@@ -20,6 +20,8 @@ enum MascotArt {
     static func menuBarImage() -> NSImage
     /// Writes AppIcon.iconset into `folder`. `scripts/build.sh` turns it into the app icon.
     @MainActor static func exportIcon(to folder: URL) throws
+    /// Writes the README and website header image.
+    @MainActor static func exportHero(to file: URL) throws
     /// Writes a PNG of every mood.
     @MainActor static func exportSheet(to file: URL) throws
     /// Writes a PNG of a sample guide card in the default theme.

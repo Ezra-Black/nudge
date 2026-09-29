@@ -22,6 +22,12 @@ struct NudgeApp: App {
             NSApp.terminate(nil)
             return
         }
+        if let flag = ProcessInfo.processInfo.arguments.firstIndex(of: "--export-hero"), ProcessInfo.processInfo.arguments.count > flag + 1
+        {
+            try? MascotArt.exportHero(to: URL(fileURLWithPath: ProcessInfo.processInfo.arguments[flag + 1]))
+            NSApp.terminate(nil)
+            return
+        }
         if let flag = ProcessInfo.processInfo.arguments.firstIndex(of: "--export-character-sheet"),
             ProcessInfo.processInfo.arguments.count > flag + 1
         {

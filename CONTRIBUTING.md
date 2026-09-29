@@ -20,7 +20,7 @@ These protect the people who use Nudge. A pull request that breaks one can't be 
 2. **Nudge guides; it never acts.** It must never click, type, scroll or change anything in another app, or press people to share passwords or turn off protections.
 3. **Read only when asked.** Screen content is read only after the person presses a shortcut, and only while a guide is showing. It's never written to disk or logged. Password fields are never read.
 4. **Be kind to eyes and nerves.** Keep text large and readable, targets big, and motion calm. Respect Reduce Motion. Never blame the person for anything.
-5. **Leave the brand alone unless asked.** The files in `Sources/Nudge/Brand/`, `docs/images/` and `marketing/` are covered by the [Nudge Brand License](LICENSE-BRAND.md). Improvements are welcome, but please open an issue before changing the character's look.
+5. **Leave the brand alone unless asked.** The files in `Sources/Nudge/Brand/`, `docs/images/`, `marketing/` and `site/` are covered by the [Nudge Brand License](LICENSE-BRAND.md). Improvements are welcome, but please open an issue before changing the character's look.
 
 ## Getting set up
 

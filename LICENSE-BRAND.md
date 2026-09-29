@@ -12,7 +12,8 @@ Nudge's source code is open source under the [Apache License 2.0](LICENSE). **Nu
   - [`Sources/Nudge/Brand/`](Sources/Nudge/Brand/): the code that draws the character, the app icon and the menu bar icon
   - [`docs/images/`](docs/images/): artwork and screenshots that show the character
   - [`marketing/`](marketing/): the launch ad, its music and its source
-  - the app icon (`AppIcon.icns`) and every image made with `--export-icon`, `--export-character-sheet` or `--export-theme-preview`
+  - [`site/`](site/): the Nudge website
+  - the app icon (`AppIcon.icns`) and every image made with `--export-icon`, `--export-hero`, `--export-character-sheet` or `--export-theme-preview`
 
 ## What you may do
 

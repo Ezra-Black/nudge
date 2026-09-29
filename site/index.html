@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nudge: just show me where</title>
+  <meta name="description" content="Nudge is a friendly guide for your Mac. Press one shortcut in any app or website, and Nudge points at each button and explains what it does, in plain words. Everything stays on your Mac.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1B1D2B" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" href="images/app-icon.png">
+  <link rel="apple-touch-icon" href="images/app-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Nudge: just show me where">
+  <meta property="og:description" content="A friendly guide that explains any Mac app or website, one step at a time. Everything stays on your Mac.">
+  <meta property="og:image" content="https://ezra-black.github.io/nudge/images/hero.png">
+  <meta property="og:url" content="https://ezra-black.github.io/nudge/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the content</a>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Nudge, back to the top">
+      <img src="images/app-icon.png" alt="" width="40" height="40">
+      <span>Nudge</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#features">What it does</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+    <a class="code-link" href="https://github.com/Ezra-Black/nudge">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" /></svg>
+      Looking for the code?
+    </a>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-art">
+        <img src="images/hero.png" width="700" height="687" alt="The Nudge app icon, with Nudge, a small round cloud-like character, peeking happily over the top of it">
+      </div>
+      <div class="hero-text">
+        <p class="eyebrow">A friendly guide for your Mac</p>
+        <h1>Just show me where.</h1>
+        <p class="lede">Press one shortcut in any app or website. Nudge points at each button and tells you, in plain words, what it does and why you'd use it.</p>
+        <div class="actions">
+          <span class="button primary" role="note">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 7v5l3 2" /><circle cx="12" cy="12" r="9" /></svg>
+            Coming soon to the Mac
+          </span>
+          <a class="button secondary" href="https://github.com/Ezra-Black/nudge">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" /></svg>
+            Looking for the code?
+          </a>
+        </div>
+        <p class="fineprint">One simple price. Your screen never leaves your Mac.</p>
+      </div>
+    </section>
+
+    <section id="how" aria-labelledby="how-title">
+      <h2 id="how-title">As easy as one, two, three</h2>
+      <ol class="steps">
+        <li class="glass">
+          <span class="number" aria-hidden="true">1</span>
+          <h3>Open any app or website</h3>
+          <p>Mail, Safari, System Settings, a website you're visiting: anything you'd like help with.</p>
+        </li>
+        <li class="glass">
+          <span class="number" aria-hidden="true">2</span>
+          <h3>Press <kbd>⌃</kbd> <kbd>⇧</kbd> <kbd>Space</kbd></h3>
+          <p>Nudge looks at the window and tells you what it's for.</p>
+        </li>
+        <li class="glass">
+          <span class="number" aria-hidden="true">3</span>
+          <h3>Follow the highlight</h3>
+          <p>Nudge points at each button and explains it. Press <kbd>Space</kbd> for the next one.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="showcase" aria-labelledby="showcase-title">
+      <div class="showcase-text">
+        <h2 id="showcase-title">Big, clear and calm</h2>
+        <p>Every explanation arrives on a large, easy-to-read card. A soft glow shows exactly where to look, and everything else is gently dimmed, so your eyes always know where to go.</p>
+        <p>Nudge floats right beside what he's explaining, and keeps clear of the thing he's talking about.</p>
+      </div>
+      <figure class="showcase-art glass">
+        <picture>
+          <source srcset="images/theme-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/theme-light.png" width="720" height="540" loading="lazy" alt="A Nudge card titled Share this page, saying it sends a link to this page by Mail, Messages or AirDrop, with large Back and Next buttons and Nudge pointing at it">
+        </picture>
+      </figure>
+    </section>
+
+    <section id="features" aria-labelledby="features-title">
+      <h2 id="features-title">What Nudge can do</h2>
+      <ul class="features">
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M3 9h18M7 6.5h.01M10 6.5h.01" /></svg>
+          <h3>Explains the whole window</h3>
+          <p>First what the window is for, then its buttons, links, fields and menus, in order. On a website, Nudge says where each link goes.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" /><rect x="8" y="8" width="8" height="8" rx="1.5" /></svg>
+          <h3>Explains just one part</h3>
+          <p>Press <kbd>⌃</kbd> <kbd>⇧</kbd> <kbd>A</kbd> and drag a box around anything. Nudge explains only what's inside: its buttons, its pictures, then its words.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="m21 16-5-5-8 8" /></svg>
+          <h3>Sees pictures</h3>
+          <p>Inside a box you drag out, Nudge looks at photos and pictures and tells you what they seem to show: "That's a photo of a dog."</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r="0.8" /></svg>
+          <h3>Helps you get something done</h3>
+          <p>Type what you want to do, like "print this page", and Nudge shows you one step at a time, waiting for you after each one.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 10v4h3.5L12 18V6L7.5 10H4Z" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /></svg>
+          <h3>Reads to you</h3>
+          <p>Nudge can read every card aloud, and you can pause or stop him anytime. Press <kbd>Space</kbd> to go on, at your own pace.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5" /><rect x="14" y="4" width="6" height="6" rx="1.5" /><rect x="4" y="14" width="6" height="6" rx="1.5" /><rect x="14" y="14" width="6" height="6" rx="1.5" /></svg>
+          <h3>Keeps things simple</h3>
+          <p>Buttons that belong together are explained together. A calculator's number keys are one step, not ten.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" /></svg>
+          <h3>Asks how he did</h3>
+          <p>At the end, Nudge asks "Did I do good?" If something wasn't right, you can tell him. Your answer stays on your Mac.</p>
+        </li>
+        <li class="glass">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.4 0 1.9-1 1.4-2.2-.6-1.3.3-2.8 1.8-2.8H17a3.5 3.5 0 0 0 3.5-3.5" /><circle cx="8" cy="10" r="1" /><circle cx="12" cy="7.5" r="1" /><circle cx="16" cy="10" r="1" /></svg>
+          <h3>Looks the way you like</h3>
+          <p>Choose the colors, the font, how big the text is, the highlight, the glow, and how big Nudge is, with a live preview.</p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="meet" aria-labelledby="meet-title">
+      <h2 id="meet-title">Meet Nudge</h2>
+      <p class="section-lede">He points at whatever he's explaining, thinks while he reads, cheers when you're done, and hides his eyes when he gets something wrong.</p>
+      <figure class="glass meet-art">
+        <img src="images/character-sheet.png" width="1138" height="541" loading="lazy" alt="Nudge in fifteen expressions: happy, waving, excited, cheery, thinking, curious, confused, surprised, pointing, celebrating, sleeping, focused, upset, angry and shy">
+      </figure>
+    </section>
+
+    <section class="privacy" id="privacy" aria-labelledby="privacy-title">
+      <div class="glass privacy-card">
+        <h2 id="privacy-title">Your screen never leaves your Mac</h2>
+        <p class="section-lede">Nudge is built so that it <em>can't</em> share what you're looking at.</p>
+        <ul class="promises">
+          <li><strong>No internet needed.</strong> Nudge has no servers, no accounts, no ads and no tracking.</li>
+          <li><strong>Private by design.</strong> Explanations come from Apple's own on-device intelligence, right on your Mac.</li>
+          <li><strong>Only when you ask.</strong> Nudge looks at a window only after you press its shortcut, and never reads password fields.</li>
+          <li><strong>You stay in charge.</strong> Nudge shows you where to go. He never clicks, types or changes anything for you.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="get" aria-labelledby="get-title">
+      <div class="glass get-card">
+        <img src="images/app-icon.png" width="112" height="112" alt="">
+        <h2 id="get-title">Nudge is coming soon</h2>
+        <p>One simple price for the ready-to-use app.</p>
+        <p class="requirements">Needs a Mac with Apple silicon, running macOS 26 or later, with Apple Intelligence turned on.</p>
+      </div>
+      <div class="glass dev-card">
+        <h2>Looking for the code?</h2>
+        <p>Nudge is open source. Developers can read every line, build it for free, and help make it better.</p>
+        <a class="button primary" href="https://github.com/Ezra-Black/nudge">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" /></svg>
+          See Nudge on GitHub
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="More">
+      <a href="https://github.com/Ezra-Black/nudge">Code on GitHub</a>
+      <a href="https://github.com/Ezra-Black/nudge/issues/new/choose">Report a problem</a>
+      <a href="https://github.com/Ezra-Black/nudge/blob/main/TRADEMARKS.md">Trademarks</a>
+    </nav>
+    <p>© 2026 Ezra Black. Nudge and the Nudge character are trademarks of Ezra Black.</p>
+  </footer>
+</body>
+</html>

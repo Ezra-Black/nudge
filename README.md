@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/character-sheet.png" width="720" alt="Nudge, a small floating cloud-like character with big eyes, shown in fifteen expressions from happy to shy">
+  <img src="docs/images/hero.png" width="360" alt="The Nudge app icon, with Nudge, a small round cloud-like character, peeking happily over the top of it">
 </p>
 
 <h1 align="center">Nudge</h1>
@@ -9,6 +9,8 @@
   A friendly guide that explains any Mac app or website, one step at a time.<br>
   Made for people who find computers confusing, and it never sends your screen anywhere.
 </p>
+
+<p align="center"><a href="https://ezra-black.github.io/nudge/"><strong>Visit the website →</strong></a></p>
 
 <p align="center">
   <a href="https://github.com/Ezra-Black/nudge/actions/workflows/ci.yml"><img src="https://github.com/Ezra-Black/nudge/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>

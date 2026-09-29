@@ -22,9 +22,11 @@ struct MascotView: View {
     var pointing: Double = 0
     var animated = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Drawn into an image: hold a still pose rather than catching a blink.
+    @Environment(\.isSnapshot) private var isSnapshot
 
     var body: some View {
-        if animated && !reduceMotion {
+        if animated && !reduceMotion && !isSnapshot {
             TimelineView(.animation) { timeline in
                 MascotFigure(mood: mood, size: size, pointing: pointing, time: timeline.date.timeIntervalSinceReferenceDate)
             }

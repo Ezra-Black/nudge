@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 SWIFT_SOURCES := Sources Tests Package.swift
 
-.PHONY: help build run test test-swift test-engine lint format clean
+.PHONY: help build run test test-swift test-engine lint format clean site site-serve
 
 help: ## List the available tasks
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  make %-12s %s\n", $$1, $$2}'
@@ -32,3 +32,11 @@ format: ## Format all Swift and Rust code
 
 clean: ## Remove build output
 	rm -rf .build build engine/target
+
+site: ## Assemble the website into build/site
+	rm -rf build/site && mkdir -p build/site
+	cp -R site/. build/site/
+	cp -R docs/images build/site/images
+
+site-serve: site ## Preview the website at http://127.0.0.1:8000
+	python3 -m http.server 8000 --bind 127.0.0.1 --directory build/site
