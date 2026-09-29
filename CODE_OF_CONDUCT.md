@@ -35,7 +35,7 @@ This Code of Conduct applies in all community spaces, and when someone is offici
 
 ## Reporting
 
-If you experience or witness unacceptable behavior, report it privately to the maintainers at **[conduct contact to be added]**. All reports will be reviewed and investigated promptly and fairly, and the privacy and safety of the person reporting will be respected.
+If you experience or witness unacceptable behavior, report it privately to the maintainers at **[dev.ezrablack@gmail.com](mailto:dev.ezrablack@gmail.com)**. All reports will be reviewed and investigated promptly and fairly, and the privacy and safety of the person reporting will be respected.
 
 ## Consequences
 
