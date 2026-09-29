@@ -1,0 +1,4 @@
+{"version": 1, "command": "hello"}
+{"version": 1, "command": "cancel"}
+{"version": 1, "command": "clear"}
+{"version": 1, "command": "next"}

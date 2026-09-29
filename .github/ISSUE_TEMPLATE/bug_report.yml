@@ -1,0 +1,80 @@
+name: Bug report
+description: Something didn't work, or Nudge explained something wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! Please **don't include personal information** (names, emails, account details) in text or screenshots. Nudge's screens are often full of it.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did Nudge do or say? If an explanation was wrong, quote it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Which app or website was Nudge explaining?
+      placeholder: "e.g. Safari on apple.com, Mail, Calculator"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How did you start the guide?
+      options:
+        - Whole window (⌃⇧Space)
+        - An area I dragged out (⌃⇧A)
+        - With a goal I typed
+        - The welcome tour
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Press ⌃⇧Space
+        3. …
+  - type: input
+    id: version
+    attributes:
+      label: Nudge version
+      description: From the settings window, or "built from source at <commit>".
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: "e.g. macOS 26.3, MacBook Air M2"
+    validations:
+      required: true
+  - type: checkboxes
+    id: permissions
+    attributes:
+      label: Permissions
+      options:
+        - label: Accessibility is turned on for Nudge
+        - label: Screen Recording is turned on for Nudge
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: If you built Nudge yourself, paste the output of `Nudge.app/Contents/MacOS/Nudge --diagnostics`.
+      render: text
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or a recording
+      description: Drag files here. Please blur anything personal.

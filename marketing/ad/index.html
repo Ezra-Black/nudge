@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nudge — Ad</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="cues.js"></script>
+<style>
+  :root {
+    --label: #1D1D1F; --secondary: #6E6E73; --opaque: #FFFFFF; --accent: #0A84FF;
+    --gold: #FFC23D; --gold-deep: #F2A516;
+    --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+    --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0B0D14; overflow: hidden; }
+  body { font-family: var(--ui); color: var(--label); -webkit-font-smoothing: antialiased; }
+  #frame { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #stage { position: relative; width: 1440px; height: 1440px; overflow: hidden; background: #1B3A8C; }
+  #wall { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+  #world { position: absolute; left: 0; top: 0; width: 1px; height: 1px; transform-origin: 0 0; will-change: transform; }
+  .abs { position: absolute; }
+
+  /* Liquid Glass: a lens over the wallpaper, not frosted plastic. */
+  .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,0.30), rgba(255,255,255,0.12) 60%, rgba(255,255,255,0.20));
+    backdrop-filter: blur(14px) saturate(1.8) brightness(1.07);
+    -webkit-backdrop-filter: blur(14px) saturate(1.8) brightness(1.07);
+    box-shadow: inset 1.2px 1.2px 0 rgba(255,255,255,0.92), inset -1px -1px 0 rgba(255,255,255,0.30),
+                inset 0 0 22px rgba(255,255,255,0.16), 0 14px 36px rgba(8,18,60,0.16), 0 2px 6px rgba(8,18,60,0.10);
+  }
+  .glass.readable { background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(255,255,255,0.58) 60%, rgba(255,255,255,0.70)); }
+
+  /* Menu bar */
+  #menubar { left: -600px; top: 0; width: 5400px; height: 46px; display: flex; align-items: center; gap: 30px;
+    padding-left: 1060px; color: #fff; font: 600 19px var(--ui); text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    background: linear-gradient(rgba(255,255,255,0.10), rgba(255,255,255,0.04)); }
+  #menubar .right { position: absolute; left: 1960px; display: flex; gap: 26px; align-items: center; font-weight: 500; }
+  #menubar svg { display: block; }
+
+  /* Marketing type */
+  .type { position: absolute; left: 0; top: 0; white-space: nowrap; font: 800 118px/1 var(--display); letter-spacing: -3px;
+    color: #fff; text-shadow: 0 8px 40px rgba(6,16,60,0.35); transform-origin: 50% 50%; will-change: transform, opacity; }
+
+  /* Windows */
+  .win { position: absolute; background: #FFFFFF; border-radius: 30px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 40px 90px rgba(6,16,60,0.35), 0 10px 26px rgba(6,16,60,0.18); }
+  .side { position: absolute; left: 12px; top: 12px; bottom: 12px; border-radius: 22px;
+    background: linear-gradient(180deg, rgba(236,239,247,0.96), rgba(229,233,244,0.96));
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06); }
+  .lights { position: absolute; left: 22px; top: 20px; display: flex; gap: 11px; }
+  .lights i { width: 17px; height: 17px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.12); }
+  .lights i:nth-child(1) { background: #FF5F57; } .lights i:nth-child(2) { background: #FEBC2E; } .lights i:nth-child(3) { background: #28C840; }
+  .search { position: absolute; left: 14px; right: 14px; top: 58px; height: 42px; border-radius: 21px; background: rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 10px; padding-left: 16px; color: var(--secondary); font-size: 18px; }
+  .rows { position: absolute; left: 10px; right: 10px; }
+  .row { height: 42px; display: flex; align-items: center; gap: 13px; padding: 0 12px; font-size: 19px; position: relative; z-index: 1; }
+  .gap { height: 14px; }
+  .ico { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; flex: none;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08); }
+  .ico svg { width: 20px; height: 20px; }
+  .sel { position: absolute; left: 10px; right: 10px; height: 42px; border-radius: 12px; background: rgba(10,132,255,0.16); z-index: 0; }
+  .acct { position: absolute; left: 22px; right: 22px; top: 116px; height: 58px; display: flex; align-items: center; gap: 14px; }
+  .avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #FFB38A, #FF7A7A); color: #fff;
+    display: flex; align-items: center; justify-content: center; font: 700 22px var(--ui); }
+  .acct b { font-size: 19px; display: block; } .acct span { font-size: 15px; color: var(--secondary); }
+
+  .content { position: absolute; top: 0; right: 0; bottom: 0; }
+  .head { position: absolute; left: 0; right: 0; top: 0; height: 76px; display: flex; align-items: center; gap: 16px; padding: 0 30px;
+    font: 700 26px var(--ui); }
+  .chev { display: flex; gap: 6px; color: #B0B0B5; }
+  .pane { position: absolute; left: 0; right: 0; top: 76px; bottom: 0; padding: 4px 30px 0; transform-origin: 0 0; will-change: transform, opacity; }
+  .group { background: rgba(0,0,0,0.035); border-radius: 18px; padding: 4px 0; margin-bottom: 20px; }
+  .item { min-height: 60px; display: flex; align-items: center; gap: 14px; padding: 0 20px; font-size: 19px; position: relative; }
+  .item + .item::before { content: ""; position: absolute; left: 20px; right: 20px; top: 0; height: 1px; background: rgba(0,0,0,0.07); }
+  .item .grow { flex: 1; } .item small { display: block; font-size: 15px; color: var(--secondary); margin-top: 2px; }
+  .label { font: 700 16px var(--ui); color: var(--secondary); margin: 6px 6px 10px; }
+  .tog { width: 58px; height: 32px; border-radius: 16px; background: #0A84FF; position: relative; flex: none; display: inline-block; }
+  .tog i { position: absolute; top: 3px; left: 29px; width: 26px; height: 26px; border-radius: 13px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); display: block; }
+  .tog.off { background: rgba(0,0,0,0.12); } .tog.off i { left: 3px; }
+  .pop { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 16px; border-radius: 10px; background: #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.08); font-size: 18px; }
+  .slider { position: relative; width: 300px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.12); display: inline-block; flex: none; }
+  .slider b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #0A84FF; display: block; }
+  .slider i { position: absolute; top: -11px; width: 28px; height: 28px; margin-left: -14px; border-radius: 14px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3); display: block; }
+  .btn { display: inline-flex; height: 38px; align-items: center; padding: 0 18px; border-radius: 19px; background: rgba(0,0,0,0.06); font-size: 17px; }
+
+  /* Displays */
+  .preview { height: 188px; border-radius: 18px; margin-bottom: 20px; background: rgba(0,0,0,0.035); display: flex; align-items: center; justify-content: center; gap: 34px; }
+  .mon { width: 250px; height: 150px; border-radius: 12px; background: linear-gradient(135deg, #1B3A8C, #2BB3B1 45%, #7B5CFF 75%, #FFB38A); box-shadow: 0 0 0 6px #1D1D1F; }
+  .res { display: flex; justify-content: space-between; padding: 18px 26px 16px; }
+  .thumb { width: 150px; text-align: center; font-size: 16px; color: var(--secondary); }
+  .thumb .scr { height: 98px; border-radius: 12px; background: #F2F4F8; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 0 16px; margin-bottom: 8px; }
+  .thumb .scr u { display: block; height: 7px; border-radius: 4px; background: rgba(0,0,0,0.18); }
+  .thumb.on .scr { box-shadow: 0 0 0 3px #0A84FF; }
+  .thumb.on { color: var(--label); font-weight: 600; }
+
+  /* Finder */
+  .grid { position: absolute; left: 290px; right: 30px; top: 96px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px 24px; }
+  .file { text-align: center; font-size: 16px; color: var(--label); }
+  .file .pic { height: 118px; border-radius: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+
+  /* Safari */
+  .tbar { position: absolute; left: 0; right: 0; top: 0; height: 74px; display: flex; align-items: center; padding: 0 22px 0 118px; gap: 18px; color: #6E6E73; }
+  .addr { flex: 1; height: 44px; border-radius: 22px; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 18px; color: var(--label); margin: 0 30px; }
+  .tb { width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+  .page { position: absolute; left: 24px; right: 24px; top: 84px; bottom: 24px; border-radius: 18px; overflow: hidden; background: #FFFBF4; }
+
+  /* Nudge's own surfaces */
+  .bubble { position: absolute; left: 0; top: 0; border-radius: 26px; padding: 14px 24px; font: 700 30px/1.15 var(--display); letter-spacing: -0.3px;
+    white-space: nowrap; transform-origin: 0 50%; will-change: transform, opacity; }
+  .bubble.wide { white-space: normal; width: 470px; font-size: 27px; line-height: 1.25; padding: 18px 26px; }
+  .key { position: absolute; height: 92px; min-width: 92px; padding: 0 22px; border-radius: 22px; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; color: var(--label); font: 600 20px var(--ui); }
+  .key b { font-size: 34px; line-height: 1; margin-bottom: 4px; }
+  #pill { position: absolute; width: 880px; height: 108px; border-radius: 54px; display: flex; align-items: center; gap: 20px; padding: 0 34px 0 22px;
+    font: 500 36px var(--ui); letter-spacing: -0.3px; }
+  .face { width: 66px; height: 66px; flex: none; }
+  .caret { display: inline-block; width: 3px; height: 40px; background: #0A84FF; margin-left: 3px; vertical-align: -7px; border-radius: 2px; }
+  #chip { position: absolute; height: 70px; border-radius: 35px; display: flex; align-items: center; gap: 14px; padding: 0 28px 0 14px; font: 600 28px var(--ui); white-space: nowrap; }
+  #chip .face { width: 48px; height: 48px; }
+
+  /* Payoff and hero */
+  #call { position: absolute; width: 640px; height: 150px; border-radius: 40px; display: flex; align-items: center; gap: 20px; padding: 0 24px; }
+  #call .av { width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, #2BB3B1, #1B3A8C); color: #fff; display: flex; align-items: center; justify-content: center; font: 700 36px var(--ui); flex: none; }
+  #call .who { flex: 1; } #call .who b { font: 700 28px var(--ui); display: block; } #call .who span { font-size: 20px; color: #3A3A3C; }
+  .cbtn { height: 64px; border-radius: 32px; padding: 0 26px; display: flex; align-items: center; justify-content: center; font: 700 22px var(--ui); color: #fff; }
+  #decline { background: #FF453A; } #accept { background: #34C759; }
+  #wordmark { font: 800 180px/1 var(--display); letter-spacing: -5px; color: #fff; text-shadow: 0 10px 50px rgba(6,16,60,0.35); }
+  #tagline { white-space: nowrap; font: 600 46px/1.1 var(--display); letter-spacing: -0.6px; color: rgba(255,255,255,0.94); text-shadow: 0 4px 24px rgba(6,16,60,0.35); }
+  #cta { white-space: nowrap; height: 96px; border-radius: 48px; padding: 0 44px; display: flex; align-items: center; gap: 16px; font: 700 34px var(--display); letter-spacing: -0.3px; }
+
+  #targets, #pointerSvg { position: absolute; left: 0; top: 0; overflow: visible; }
+  /* Layering: windows, then Nudge's surfaces, targets, Nudge, his bubbles, and the person's pointer on top. */
+  .type { z-index: 10; } #call, #cta, #wordmark, #tagline { z-index: 20; } .key, #pill, #chip { z-index: 30; }
+  #targets { z-index: 40; } .bubble { z-index: 55; } #pointerSvg { z-index: 60; }
+  #nudgeWrap { position: absolute; left: 0; top: 0; width: 1px; height: 1px; will-change: transform; }
+  #nudgeWrap svg { position: absolute; left: -160px; top: -160px; overflow: visible; }
+
+  /* Preview controls, only outside rendering */
+  #controls { position: fixed; left: 0; right: 0; bottom: 0; height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 18px;
+    background: rgba(20,22,30,0.92); color: #fff; font: 500 14px var(--ui); }
+  #controls button { background: #fff; color: #111; border: 0; border-radius: 16px; height: 32px; padding: 0 16px; font: 600 14px var(--ui); cursor: pointer; }
+  #controls input { flex: 1; }
+  body.render #controls { display: none; }
+  /* Nudge's real guide card, in the Nudge theme with a gold accent. */
+  .gcard { position: absolute; left: 0; top: 0; width: 540px; padding: 26px 28px 24px; z-index: 45; transform-origin: 30% 0%; will-change: transform, opacity; }
+  .gback { position: absolute; inset: 0; border-radius: 30px; background: rgba(238,241,255,0.84);
+    backdrop-filter: blur(18px) saturate(1.6); -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    box-shadow: inset 1.4px 1.4px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(255,194,61,0.55), 0 0 36px rgba(255,194,61,0.42), 0 16px 36px rgba(8,18,60,0.24); }
+  .gcard > *:not(.gback) { position: relative; }
+  .ghead { display: flex; align-items: center; gap: 12px; font: 500 20px var(--ui); color: #6E6E73; }
+  .ghead .ico { border-radius: 9px; }
+  .ghead .sp { flex: 1; }
+  .cb { width: 38px; height: 38px; border-radius: 19px; background: rgba(255,255,255,0.7); box-shadow: 0 0 0 1px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; color: #3A3A3C; font: 700 16px var(--ui); }
+  .gtitle { font: 600 29px/1.2 var(--ui); color: var(--label); margin-top: 16px; letter-spacing: -0.2px; }
+  .gmsg { font: 400 25px/1.35 var(--ui); color: var(--label); margin-top: 8px; }
+  .ghint { font: 400 20px var(--ui); color: #6E6E73; margin-top: 12px; }
+  .gdots { display: flex; justify-content: center; gap: 9px; margin-top: 20px; height: 12px; align-items: center; }
+  .gdots i { width: 11px; height: 11px; border-radius: 6px; background: rgba(60,60,67,0.3); display: block; }
+  .gdots i.on { width: 30px; background: #FFC23D; } .gdots i.more { width: 7px; height: 7px; }
+  .gfoot { display: flex; justify-content: space-between; margin-top: 18px; }
+  .gbtn { height: 60px; border-radius: 30px; padding: 0 28px; display: flex; align-items: center; gap: 10px; font: 600 24px var(--ui); color: var(--label);
+    background: rgba(255,255,255,0.72); box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 2px 6px rgba(8,18,60,0.08); }
+  .gbtn.pri { background: #FFC23D; box-shadow: 0 0 0 1px rgba(170,110,0,0.25), 0 4px 12px rgba(255,170,0,0.3); }
+  .gbtn.off { opacity: 0.45; }
+  .opt { display: flex; align-items: center; gap: 16px; border-radius: 22px; padding: 14px 20px; margin-top: 12px; background: rgba(255,255,255,0.72); box-shadow: 0 0 0 1px rgba(0,0,0,0.06); }
+  .opt.pri { background: #FFC23D; }
+  .opt b { font: 600 25px var(--ui); display: block; } .opt span { font: 400 19px var(--ui); color: #3A3A3C; }
+  .opt svg { width: 34px; height: 34px; flex: none; }
+  #loading { position: absolute; left: 0; top: 0; z-index: 45; height: 72px; border-radius: 36px; padding: 0 30px 0 22px; display: flex; align-items: center; gap: 14px; font: 500 25px var(--ui); white-space: nowrap; }
+  .spin { width: 26px; height: 26px; border-radius: 50%; border: 3.5px solid rgba(60,60,67,0.18); border-top-color: #FFB020; display: block; }
+
+  /* Calculator */
+  .calc { background: #1C1C1E !important; }
+  .cdisp { position: absolute; right: 42px; top: 70px; font: 300 84px var(--ui); color: #fff; letter-spacing: -1px; }
+  .ckeys { position: absolute; left: 42px; top: 190px; display: grid; grid-template-columns: repeat(4, 86px); gap: 14px; }
+  .ck { width: 86px; height: 86px; border-radius: 43px; display: flex; align-items: center; justify-content: center; font: 400 36px var(--ui); color: #fff; background: #3A3A3C; }
+  .ck.fn { background: #A5A5AA; color: #1C1C1E; } .ck.op { background: #FF9F0A; font-size: 42px; }
+  .ck.wide { grid-column: span 2; width: auto; justify-content: flex-start; padding-left: 32px; }
+
+  /* Safari page */
+  .site { display: flex; align-items: center; gap: 34px; height: 72px; padding: 0 44px; font: 600 22px var(--ui); background: #fff; border-bottom: 1px solid #F0E6D6; color: #3A3A3C; }
+  .site b { font: 800 24px var(--display); margin-right: auto; color: #E0663A; }
+
+  /* Explain an Area selector */
+  #areaHint, #areaBar { position: absolute; left: 0; top: 0; z-index: 70; }
+  #areaHint { border-radius: 28px; padding: 16px 28px; text-align: center; white-space: nowrap; }
+  #areaHint b { font: 600 26px var(--ui); display: block; } #areaHint span { font: 400 19px var(--ui); color: #3A3A3C; }
+  #areaBar { display: flex; gap: 12px; padding: 12px; border-radius: 40px; }
+  #areaBar .gbtn { height: 64px; }
+  #dimSvg { position: absolute; left: 0; top: 0; overflow: visible; z-index: 35; }
+  #areaSvg { position: absolute; left: 0; top: 0; overflow: visible; z-index: 69; }
+</style>
+</head>
+<body>
+<div id="frame"><div id="stage"><canvas id="wall"></canvas><div id="world"></div></div></div>
+<div id="controls"><button id="play">Play</button><input id="scrub" type="range" min="0" max="19" step="0.001" value="0"><span id="time">0.00 s</span></div>
+<audio id="music" src="soundtrack.wav" preload="auto"></audio>
+<script>
+'use strict';
+const { T } = window.NUDGE_CUES;
+const RENDER = new URLSearchParams(location.search).has('render');
+if (RENDER) document.body.classList.add('render');
+
+// ───────────────────────── Motion ─────────────────────────
+// Every animated value is a sum of damped-spring step responses, so seek(t) is exact at any frame and
+// retargeting mid-flight keeps momentum. `response` and `damping` follow SwiftUI's spring parameters.
+const S = {
+  ui: [0.45, 0.86], press: [0.25, 0.72], target: [0.30, 0.90], small: [0.35, 0.84],
+  travel: [0.45, 0.82], camera: [0.55, 1.0], snap: [0.0001, 1], slow: [0.9, 1.0], type: [0.42, 0.8],
+};
+function springStep(t, [response, damping]) {
+  if (t <= 0) return 0;
+  if (response < 0.001) return 1;
+  const w = 2 * Math.PI / response;
+  if (damping >= 1) return 1 - Math.exp(-w * t) * (1 + w * t);
+  const wd = w * Math.sqrt(1 - damping * damping);
+  return 1 - Math.exp(-damping * w * t) * (Math.cos(wd * t) + (damping * w / wd) * Math.sin(wd * t));
+}
+const isArr = Array.isArray;
+class Track {
+  constructor(initial, spring = S.small) { this.v0 = initial; this.keys = []; this.spring = spring; }
+  to(time, value, spring) { this.keys.push({ time, value, spring: spring || this.spring }); return this; }
+  set(time, value) { return this.to(time, value, S.snap); }
+  at(t) {
+    let prev = this.v0;
+    let out = isArr(prev) ? prev.slice() : prev;
+    for (const k of this.keys) {
+      if (k.time > t) break;
+      const p = springStep(t - k.time, k.spring);
+      if (isArr(out)) for (let i = 0; i < out.length; i++) out[i] += (k.value[i] - prev[i]) * p;
+      else out += (k.value - prev) * p;
+      prev = k.value;
+    }
+    return out;
+  }
+}
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+const fade = (t, t0, d) => smooth((t - t0) / d);
+/** 0 → 1 → 0 over [a, b] with the given ramps. */
+const within = (t, a, b, rin = 0.12, rout = 0.12) => Math.min(fade(t, a, rin), 1 - fade(t, b, rout));
+function schedule(t, list) { let cur = list[0][1]; for (const [time, v] of list) if (t >= time) cur = v; return cur; }
+
+// ───────────────────────── Wallpaper ─────────────────────────
+// Painted once: soft fields of deep blue, teal, violet and warm peach with flowing Tahoe-like ribbons.
+const WALL = { x: -500, y: -500, w: 4200, h: 3500, res: 0.45 };
+function paintWallpaper() {
+  const c = document.getElementById('wall');
+  c.width = Math.round(WALL.w * WALL.res); c.height = Math.round(WALL.h * WALL.res);
+  c.style.width = WALL.w + 'px'; c.style.height = WALL.h + 'px';
+  const g = c.getContext('2d');
+  g.scale(WALL.res, WALL.res); g.translate(-WALL.x, -WALL.y);
+  const bg = g.createLinearGradient(-500, -500, 3700, 3000);
+  bg.addColorStop(0, '#1B3A8C'); bg.addColorStop(0.45, '#23479E'); bg.addColorStop(1, '#1B3A8C');
+  g.fillStyle = bg; g.fillRect(-500, -500, 4200, 3500);
+  const blob = (x, y, r, color, a) => {
+    const rg = g.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, color); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.globalAlpha = a; g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); g.globalAlpha = 1;
+  };
+  blob(300, 300, 1100, '#2BB3B1', 0.85);
+  blob(1500, 1300, 1000, '#7B5CFF', 0.75);
+  blob(400, 2200, 1100, '#FFB38A', 0.85);
+  blob(2600, 500, 1200, '#2BB3B1', 0.55);
+  blob(2900, 2100, 1150, '#7B5CFF', 0.6);
+  blob(1600, 2800, 900, '#FFB38A', 0.6);
+  blob(3500, 1300, 900, '#FFB38A', 0.45);
+  // Flowing ribbons, blurred into soft folds.
+  g.filter = 'blur(60px)';
+  const ribbon = (pts, color, alpha, width) => {
+    g.globalAlpha = alpha; g.strokeStyle = color; g.lineWidth = width; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(pts[0], pts[1]); g.bezierCurveTo(pts[2], pts[3], pts[4], pts[5], pts[6], pts[7]); g.stroke(); g.globalAlpha = 1;
+  };
+  ribbon([-400, 1400, 600, 600, 1500, 2300, 3600, 900], '#FFB38A', 0.45, 260);
+  ribbon([-400, 700, 900, 1500, 2000, -200, 3700, 1800], '#2BB3B1', 0.35, 220);
+  ribbon([-300, 2600, 1100, 1700, 2300, 3100, 3700, 2400], '#7B5CFF', 0.35, 300);
+  ribbon([200, -200, 900, 900, 2600, 300, 3500, -100], '#FFFFFF', 0.10, 180);
+  g.filter = 'none';
+}
+
+// ───────────────────────── Icons ─────────────────────────
+const GLYPH = {
+  wifi: '<path d="M3.5 8.2a9.5 9.5 0 0 1 13 0M6 10.8a6 6 0 0 1 8 0M8.4 13.3a2.6 2.6 0 0 1 3.2 0" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="15.6" r="1.25" fill="#fff"/>',
+  bluetooth: '<path d="M6.5 6.8l7 6.6-3.5 3.2V3.4l3.5 3.2-7 6.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>',
+  globe: '<circle cx="10" cy="10" r="6.2" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="10" cy="10" rx="2.8" ry="6.2" fill="none" stroke="#fff" stroke-width="1.3"/><path d="M3.8 10h12.4" stroke="#fff" stroke-width="1.3"/>',
+  bell: '<path d="M10 3.6c-2.7 0-4 2.2-4 4.6v2.9l-1.4 1.6h10.8L14 11.1V8.2c0-2.4-1.3-4.6-4-4.6z" fill="#fff"/><circle cx="10" cy="15" r="1.4" fill="#fff"/>',
+  speaker: '<path d="M4 8h2.8L10.5 5v10L6.8 12H4z" fill="#fff"/><path d="M13 7.3a4 4 0 0 1 0 5.4M15 5.6a6.5 6.5 0 0 1 0 8.8" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>',
+  moon: '<path d="M12.8 3.8a6.4 6.4 0 1 0 3.5 10.6A6 6 0 0 1 12.8 3.8z" fill="#fff"/>',
+  gear: '<circle cx="10" cy="10" r="4.8" fill="none" stroke="#fff" stroke-width="2.6" stroke-dasharray="2.3 1.5"/><circle cx="10" cy="10" r="2.4" fill="none" stroke="#fff" stroke-width="1.5"/>',
+  appearance: '<circle cx="10" cy="10" r="6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 4a6 6 0 0 1 0 12z" fill="#fff"/>',
+  person: '<circle cx="10" cy="4.8" r="1.7" fill="#fff"/><path d="M4.5 7.6h11M10 7.6v4.2M10 11.8l-2.6 4.4M10 11.8l2.6 4.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>',
+  display: '<rect x="3.5" y="4.5" width="13" height="8.6" rx="1.4" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 16h4M10 13.2V16" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>',
+  printer: '<path d="M6.5 7.5V4h7v3.5" fill="none" stroke="#fff" stroke-width="1.4"/><rect x="3.5" y="7.5" width="13" height="6" rx="1.4" fill="#fff"/><rect x="6.5" y="11.5" width="7" height="4.6" rx="0.6" fill="#fff" stroke="#8E8E93" stroke-width="1.1"/>',
+  shield: '<path d="M10 3.2l5.8 2.3v4.3c0 3.4-2.5 5.9-5.8 7-3.3-1.1-5.8-3.6-5.8-7V5.5z" fill="#fff"/>',
+  airdrop: '<circle cx="10" cy="11" r="1.5" fill="#fff"/><path d="M7.2 13.8a4 4 0 1 1 5.6 0M5 16a7 7 0 1 1 10 0" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>',
+  clock: '<circle cx="10" cy="10" r="6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 6.5V10l2.5 1.6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
+  apps: '<path d="M10 4l6 11H4z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>',
+  desk: '<rect x="3.5" y="5" width="13" height="9" rx="1.5" fill="none" stroke="#fff" stroke-width="1.5"/>',
+  doc: '<path d="M6 3.5h5.5L15 7v9.5H6z" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>',
+  down: '<circle cx="10" cy="10" r="6.3" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 6.3v7M7 10.5l3 3 3-3" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  mic: '<rect x="7.5" y="3.5" width="5" height="8.5" rx="2.5" fill="#fff"/><path d="M5 10a5 5 0 0 0 10 0M10 15v2" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>',
+  video: '<rect x="3" y="6" width="10" height="8" rx="2" fill="#fff"/><path d="M13.5 9l3.5-2v6l-3.5-2z" fill="#fff"/>',
+  wave: '<path d="M4 10h1.5M7 7v6M10 5v10M13 7.5v5M16 9.5v1" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>',
+  message: '<path d="M4 5.5h12v7.5H9l-3 2.5v-2.5H4z" fill="#fff"/>',
+  cal: '<rect x="4" y="5" width="12" height="11" rx="2" fill="#fff"/><path d="M4 8.5h12" stroke="#FF3B30" stroke-width="2"/>',
+  photo: '<circle cx="10" cy="10" r="6" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 1.4"/>',
+};
+const ico = (g, color, size = 28) => `<span class="ico" style="background:${color};width:${size}px;height:${size}px"><svg viewBox="0 0 20 20" style="width:${size * 0.72}px;height:${size * 0.72}px">${GLYPH[g]}</svg></span>`;
+const chevrons = '<span class="chev"><svg width="14" height="22" viewBox="0 0 14 22"><path d="M10 3L3 11l7 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><svg width="14" height="22" viewBox="0 0 14 22"><path d="M4 3l7 8-7 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+const updown = '<svg width="12" height="18" viewBox="0 0 12 18"><path d="M2.5 7L6 3.5 9.5 7M2.5 11L6 14.5 9.5 11" fill="none" stroke="#6E6E73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const tog = (on = true, id = '') => `<span class="tog${on ? '' : ' off'}"${id ? ` id="${id}"` : ''}><i></i></span>`;
+/** Nudge's face as a small icon, for the input and chip. */
+const faceIcon = `<svg class="face" viewBox="-40 -40 80 80"><defs><radialGradient id="fg" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="#fff"/><stop offset="0.6" stop-color="#EEF2FF"/><stop offset="1" stop-color="#D3DCFF"/></radialGradient></defs>
+  <ellipse cx="0" cy="2" rx="34" ry="32" fill="url(#fg)" stroke="rgba(120,140,255,0.35)" stroke-width="1.2"/>
+  <ellipse cx="-10" cy="0" rx="5.2" ry="7.6" fill="#1D1D22"/><ellipse cx="11" cy="-1" rx="5.2" ry="7.6" fill="#1D1D22"/>
+  <circle cx="-11.6" cy="-2.6" r="1.9" fill="#fff"/><circle cx="9.4" cy="-3.6" r="1.9" fill="#fff"/>
+  <path d="M-5 9h10q0 7-5 7t-5-7z" fill="#1D1D22"/></svg>`;
+
+// ───────────────────────── Scene ─────────────────────────
+const HOOK = { x: 900, y: 760 };
+const PAY = { x: 900, y: 2300 };
+const SET = { left: 1640, top: 740, w: 1180, h: 860, side: 330 };
+const CALC = { left: 3080, top: 300, w: 470, h: 712 };
+const SAF = { left: 2980, top: 1300, w: 1120, h: 760 };
+const world = document.getElementById('world');
+const el = {};
+
+const SIDEBAR = [
+  ['wifi', 'Wi‑Fi', '#0A84FF', 'wifi'], ['bluetooth', 'Bluetooth', '#0A84FF', 'bluetooth'], ['network', 'Network', '#0A84FF', 'globe'], null,
+  ['notifications', 'Notifications', '#FF3B30', 'bell'], ['sound', 'Sound', '#FF2D55', 'speaker'], ['focus', 'Focus', '#5E5CE6', 'moon'], null,
+  ['general', 'General', '#8E8E93', 'gear'], ['appearance', 'Appearance', '#3A3A3C', 'appearance'], ['accessibility', 'Accessibility', '#0A84FF', 'person'],
+  ['displays', 'Displays', '#34AADC', 'display'], ['printers', 'Printers & Scanners', '#8E8E93', 'printer'], null,
+  ['privacy', 'Privacy & Security', '#0A84FF', 'shield'],
+];
+const PANES = {
+  displays: `<div class="preview"><div class="mon"></div></div>
+    <div class="group"><div class="res">
+      <div class="thumb" id="res-large"><div class="scr"><u style="height:12px;width:70%"></u><u style="height:12px;width:90%"></u><u style="height:12px;width:55%"></u></div>Larger Text</div>
+      <div class="thumb"><div class="scr"><u style="height:9px;width:75%"></u><u style="height:9px;width:90%"></u><u style="height:9px;width:60%"></u><u style="height:9px;width:80%"></u></div>&nbsp;</div>
+      <div class="thumb on" id="res-default"><div class="scr"><u style="width:70%"></u><u style="width:92%"></u><u style="width:60%"></u><u style="width:85%"></u><u style="width:50%"></u></div>Default</div>
+      <div class="thumb"><div class="scr"><u style="height:5px;width:75%"></u><u style="height:5px;width:90%"></u><u style="height:5px;width:62%"></u><u style="height:5px;width:88%"></u><u style="height:5px;width:52%"></u><u style="height:5px;width:70%"></u></div>More Space</div>
+    </div></div>
+    <div class="group">
+      <div class="item"><span class="grow">Brightness</span><span class="slider"><b style="width:72%"></b><i style="left:72%"></i></span></div>
+      <div class="item"><span class="grow">Text size</span><span style="font-size:14px;color:#6E6E73;margin-right:4px">A</span><span class="slider" id="textsize"><b style="width:46%"></b><i style="left:46%"></i></span><span style="font-size:24px;color:#6E6E73;margin-left:4px">A</span></div>
+    </div>`,
+};
+const ICON = {
+  settings: ico('gear', '#8E8E93', 34),
+  calc: `<span class="ico" style="background:#FF9F0A;width:34px;height:34px"><svg viewBox="0 0 20 20" style="width:24px;height:24px"><path d="M6 10h8M10 6v8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>`,
+  safari: `<span class="ico" style="background:#0A84FF;width:34px;height:34px;border-radius:50%"><svg viewBox="0 0 20 20" style="width:24px;height:24px"><path d="M13.5 6.5L11 11l-4.5 2.5L9 9z" fill="#fff"/></svg></span>`,
+};
+const SPEAKER = '<svg width="18" height="18" viewBox="0 0 20 20"><path d="M3 8h3l4-3v10l-4-3H3z" fill="#3A3A3C"/><path d="M13 7a4 4 0 0 1 0 6" fill="none" stroke="#3A3A3C" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const PAUSE = '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="2" width="3.5" height="12" rx="1" fill="#3A3A3C"/><rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="#3A3A3C"/></svg>';
+
+function build() {
+  const h = [];
+  h.push(`<div class="abs" id="menubar"><span style="font-weight:800">Finder</span><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+    <span class="right"><svg width="30" height="26" viewBox="-40 -40 80 80"><ellipse cx="0" cy="2" rx="30" ry="28" fill="#fff"/><ellipse cx="-9" cy="0" rx="5" ry="7.5" fill="#6B7AB0"/><ellipse cx="10" cy="-1" rx="5" ry="7.5" fill="#6B7AB0"/></svg>
+    <svg width="26" height="22" viewBox="0 0 20 20">${GLYPH.wifi}</svg><span>100%</span><span>Tue 9:41 AM</span></span></div>`);
+  ['Your parents', 'have a new tech', 'support person.'].forEach((line, i) => h.push(`<div class="type" id="hook${i}">${line}</div>`));
+  // System Settings
+  let rows = '';
+  for (const r of SIDEBAR) rows += r ? `<div class="row" id="row-${r[0]}">${ico(r[3], r[2])}<span>${r[1]}</span></div>` : '<div class="gap"></div>';
+  h.push(`<div class="win" id="settings" style="left:${SET.left}px;top:${SET.top}px;width:${SET.w}px;height:${SET.h}px">
+    <div class="side" style="width:${SET.side - 12}px"><div class="lights"><i></i><i></i><i></i></div>
+      <div class="search"><svg width="18" height="18" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="#8E8E93" stroke-width="2"/><path d="M13 13l4 4" stroke="#8E8E93" stroke-width="2" stroke-linecap="round"/></svg>Search</div>
+      <div class="acct"><div class="avatar">M</div><div><b>Mom</b><span>Account</span></div></div>
+      <div class="rows" id="setRows" style="top:190px"><div class="sel" id="setSel"></div>${rows}</div>
+    </div>
+    <div class="content" style="left:${SET.side}px"><div class="head" id="head-displays">${chevrons}<span>Displays</span></div><div class="pane" id="pane-displays">${PANES.displays}</div></div></div>`);
+  // Calculator
+  const keys = [['AC', 'fn'], ['±', 'fn'], ['%', 'fn'], ['÷', 'op'], ['7', 'n'], ['8', 'n'], ['9', 'n'], ['×', 'op'], ['4', 'n'], ['5', 'n'], ['6', 'n'], ['−', 'op'],
+    ['1', 'n'], ['2', 'n'], ['3', 'n'], ['+', 'op'], ['0', 'n wide'], ['.', 'n'], ['=', 'op']];
+  const keyHtml = keys.map(([k, c]) => `<span class="ck ${c}"${/[0-9.]/.test(k) ? ` id="k${k === '.' ? 'dot' : k}"` : ''}>${k}</span>`).join('');
+  h.push(`<div class="win calc" id="calc" style="left:${CALC.left}px;top:${CALC.top}px;width:${CALC.w}px;height:${CALC.h}px"><div class="lights"><i></i><i></i><i></i></div><div class="cdisp">1,250</div><div class="ckeys">${keyHtml}</div></div>`);
+  // Safari
+  h.push(`<div class="win" id="safari" style="left:${SAF.left}px;top:${SAF.top}px;width:${SAF.w}px;height:${SAF.h}px;background:#F6F6F8">
+    <div class="lights" style="top:28px"><i></i><i></i><i></i></div>
+    <div class="tbar">${chevrons}<div class="addr"><svg width="14" height="16" viewBox="0 0 14 16"><rect x="1.5" y="7" width="11" height="8" rx="2" fill="#6E6E73"/><path d="M4 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="#6E6E73" stroke-width="1.6"/></svg>family-recipes.example</div>
+      <span class="tb"><svg width="22" height="24" viewBox="0 0 22 24"><path d="M11 2v13M6.5 6.5L11 2l4.5 4.5M4 11v10h14V11" fill="none" stroke="#6E6E73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="tb"><svg width="26" height="26" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#6E6E73" stroke-width="1.6"/><path d="M10 5.8v7.4M6.8 10.2l3.2 3.2 3.2-3.2" fill="none" stroke="#6E6E73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="tb"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 3v16M3 11h16" stroke="#6E6E73" stroke-width="2" stroke-linecap="round"/></svg></span></div>
+    <div class="page"><div class="site"><b>Family Recipes</b><span id="lnk-recipes">Recipes</span><span>Baking</span><span>About</span></div>
+      <div id="sf-hero" style="height:250px;background:radial-gradient(circle at 30% 45%,#FFE27A 0 62px,transparent 63px),radial-gradient(circle at 58% 60%,#FFD04A 0 82px,transparent 83px),radial-gradient(circle at 80% 38%,#FFF0A8 0 50px,transparent 51px),linear-gradient(135deg,#FFB38A,#FF8A65)"></div>
+      <div style="padding:26px 44px"><div id="sf-title"><div style="font:800 44px var(--display);letter-spacing:-1px">Grandma’s Lemon Cake</div>
+      <div style="font-size:20px;color:#6E6E73;margin-top:8px">Serves 8 · 1 hour · Easy</div></div>
+      <div style="height:14px;width:92%;background:#EFE7DA;border-radius:7px;margin:22px 0 12px"></div><div style="height:14px;width:78%;background:#EFE7DA;border-radius:7px"></div></div></div></div>`);
+  // Keys, the real guide card, the browser choice, the "Looking at…" bubble
+  h.push(`<div class="key glass readable" id="key0"></div><div class="key glass readable" id="key1"></div><div class="key glass readable" id="key2"></div>`);
+  h.push(`<div class="gcard" id="card"><div class="gback"></div>
+    <div class="ghead"><span id="cardIcon"></span><span id="cardCap"></span><span class="sp"></span><span class="cb">${SPEAKER}</span><span class="cb">${PAUSE}</span><span class="cb">✕</span></div>
+    <div id="cardBody"><div class="gtitle" id="cardTitle"></div><div class="gmsg" id="cardMsg"></div><div class="ghint" id="cardHint"></div></div>
+    <div class="gdots" id="cardDots"></div>
+    <div class="gfoot" id="cardFoot"></div></div>`);
+  h.push(`<div class="gcard" id="choice"><div class="gback"></div>
+    <div class="ghead">${ICON.safari}<span>Safari</span><span class="sp"></span><span class="cb">✕</span></div>
+    <div class="gtitle">What would you like to learn about?</div>
+    <div class="opt pri" id="optWeb"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="#1D1D1F" stroke-width="1.5"/><ellipse cx="10" cy="10" rx="3.2" ry="7" fill="none" stroke="#1D1D1F" stroke-width="1.3"/><path d="M3 10h14" stroke="#1D1D1F" stroke-width="1.3"/></svg><div><b>This web page</b><span>What’s on the page, and where its links go</span></div></div>
+    <div class="opt"><svg viewBox="0 0 20 20"><rect x="2.5" y="4" width="15" height="12" rx="2.5" fill="none" stroke="#1D1D1F" stroke-width="1.5"/><path d="M2.5 7.5h15" stroke="#1D1D1F" stroke-width="1.5"/></svg><div><b>Safari’s controls</b><span>Tabs, the address bar and toolbar buttons</span></div></div></div>`);
+  h.push(`<div class="glass readable" id="loading"><span class="spin" id="spin"></span><span id="loadText"></span></div>`);
+  // Explain an Area
+  h.push(`<div class="glass readable" id="areaHint"><b>Drag over the part you’d like explained</b><span>Click a window to choose all of it · Esc to cancel</span></div>`);
+  h.push(`<div class="glass readable" id="areaBar"><span class="gbtn">✕ Cancel</span><span class="gbtn pri" id="explainBtn">Explain This Area</span></div>`);
+  // Payoff and hero
+  h.push(`<div class="type" id="pay0">Less</div><div class="type" id="pay1">“where do I click?”</div><div class="type" id="pay2">More</div><div class="type" id="pay3">“found it.”</div>`);
+  h.push(`<div class="abs" id="wordmark">Nudge</div><div class="abs" id="tagline">A little help, right where they are.</div>`);
+  h.push(`<div class="glass readable abs" id="cta">Coming to the Mac App Store</div>`);
+  // Dimming, highlights, the area box, Nudge, pointer
+  h.push(`<svg id="dimSvg" width="1" height="1"><path id="dimPath" fill-rule="evenodd" fill="rgb(18,14,38)"/></svg>`);
+  h.push(`<svg id="targets" width="1" height="1"><defs><filter id="tglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter></defs>
+    ${[0, 1].map((i) => `<g id="tg${i}" opacity="0"><rect class="tglow" fill="none" stroke="#FFB020" stroke-width="10" filter="url(#tglow)" opacity="0.55"/><rect class="tfill" fill="rgba(255,194,61,0.07)"/><rect class="tmain" fill="none" stroke="#FFC23D" stroke-width="3.4"/><rect class="tsweep" fill="none" stroke="#FFF4CF" stroke-width="3.4" stroke-linecap="round"/></g>`).join('')}</svg>`);
+  h.push(`<svg id="areaSvg" width="1" height="1"><rect id="areaBox" fill="none" stroke="#FFC23D" stroke-width="3"/><g id="areaHandles"></g></svg>`);
+  h.push(`<div id="nudgeWrap">${nudgeSVG()}</div>`);
+  h.push(`<svg id="pointerSvg" width="1" height="1"><g id="pointer"><path d="M3 2 L3 30 L10 23.5 L14.8 34.6 L19.4 32.6 L14.6 21.8 L23.5 21.8 Z" fill="#000" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.35))"/></g></svg>`);
+  world.innerHTML = h.join('');
+  for (const node of world.querySelectorAll('[id]')) el[node.id] = node;
+  el.wall = document.getElementById('wall');
+  el.areaHandles.innerHTML = Array.from({ length: 8 }, () => '<circle r="7" fill="#fff" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>').join('');
+}
+
+// ───────────────────────── Nudge rig ─────────────────────────
+// Separate parts (shadow, wisp, arms, body, eyes, cheeks, mouth) driven per frame. The face is projected
+// onto the sphere from a yaw angle, so front, 3/4, profile and back views all come from one model.
+const R = 62;
+function nudgeSVG() {
+  return `<svg width="320" height="320" viewBox="-160 -160 320 320">
+  <defs>
+    <radialGradient id="bodyG" cx="38%" cy="28%" r="78%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.45" stop-color="#F3F5FF"/><stop offset="0.8" stop-color="#DDE5FF"/><stop offset="1" stop-color="#CAD4FF"/></radialGradient>
+    <radialGradient id="rimG" cx="50%" cy="50%" r="50%"><stop offset="0.72" stop-color="rgba(123,92,255,0)"/><stop offset="1" stop-color="rgba(110,120,255,0.30)"/></radialGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="3" stdDeviation="9" flood-color="#8FA0FF" flood-opacity="0.45"/></filter>
+    <clipPath id="clipL"><rect id="lidL" x="-30" y="-30" width="60" height="60"/></clipPath>
+    <clipPath id="clipR"><rect id="lidR" x="-30" y="-30" width="60" height="60"/></clipPath>
+  </defs>
+  <ellipse id="nShadow" cx="0" cy="${R * 1.45}" rx="${R * 0.62}" ry="${R * 0.11}" fill="rgba(10,18,60,0.13)" filter="url(#soft)"/>
+  <use id="ghost1" href="#nRig" opacity="0"/><use id="ghost2" href="#nRig" opacity="0"/>
+  <g id="nRig">
+    <g id="armsBack"></g>
+    <g id="nBody" filter="url(#glow)">
+      <ellipse id="nWisp" cx="${-R * 0.46}" cy="${R * 0.66}" rx="${R * 0.3}" ry="${R * 0.2}" fill="url(#bodyG)"/>
+      <ellipse cx="0" cy="0" rx="${R}" ry="${R * 0.96}" fill="url(#bodyG)"/>
+      <ellipse cx="0" cy="0" rx="${R}" ry="${R * 0.96}" fill="url(#rimG)"/>
+      <ellipse id="nSpec" cx="${-R * 0.34}" cy="${-R * 0.5}" rx="${R * 0.26}" ry="${R * 0.13}" fill="rgba(255,255,255,0.9)" filter="url(#soft)" transform="rotate(-28 ${-R * 0.34} ${-R * 0.5})"/>
+    </g>
+    <g id="nFace">
+      <ellipse id="cheekL" rx="8" ry="4.6" fill="#FFB8E0" opacity="0.75"/><ellipse id="cheekR" rx="8" ry="4.6" fill="#FFB8E0" opacity="0.75"/>
+      <g id="eyeL"><g clip-path="url(#clipL)"><ellipse class="ball" rx="10" ry="14.5" fill="#1D1D22"/><circle class="hl1" r="3.9" fill="#fff"/><circle class="hl2" r="1.8" fill="#fff"/></g><path class="arc" fill="none" stroke="#1D1D22" stroke-width="4" stroke-linecap="round"/></g>
+      <g id="eyeR"><g clip-path="url(#clipR)"><ellipse class="ball" rx="10" ry="14.5" fill="#1D1D22"/><circle class="hl1" r="3.9" fill="#fff"/><circle class="hl2" r="1.8" fill="#fff"/></g><path class="arc" fill="none" stroke="#1D1D22" stroke-width="4" stroke-linecap="round"/></g>
+      <g id="mouth"><path id="mouthShape" fill="#1D1D22"/><ellipse id="tongue" rx="6" ry="3.4" fill="#FF8FB8"/><path id="mouthLine" fill="none" stroke="#1D1D22" stroke-width="3.6" stroke-linecap="round"/></g>
+    </g>
+    <g id="armsFront"></g>
+  </g>
+  </svg>`;
+}
+const ARM = (id) => `<rect id="${id}" x="-2" y="-7" width="30" height="14" rx="7" fill="url(#bodyG)" stroke="rgba(120,130,255,0.45)" stroke-width="1.2"/>`;
+function setupArms() {
+  el.armsBack.innerHTML = ARM('armBackL') + ARM('armBackR');
+  el.armsFront.innerHTML = ARM('armFrontL') + ARM('armFrontR');
+  for (const id of ['armBackL', 'armBackR', 'armFrontL', 'armFrontR']) el[id] = document.getElementById(id);
+}
+
+// ───────────────────────── Anchors ─────────────────────────
+const A = {};
+const rectOf = (x, y, w, h) => ({ x, y, w, h, cx: x + w / 2, cy: y + h / 2, r: x + w, b: y + h });
+const union = (...rs) => { const x = Math.min(...rs.map((r) => r.x)), y = Math.min(...rs.map((r) => r.y)), r = Math.max(...rs.map((q) => q.r)), b = Math.max(...rs.map((q) => q.b)); return rectOf(x, y, r - x, b - y); };
+function measure() {
+  world.style.transform = 'none';
+  const base = world.getBoundingClientRect();
+  for (const id of ['row-bluetooth', 'row-displays', 'res-large', 'textsize', 'setRows', 'k7', 'k8', 'k9', 'k4', 'k5', 'k6', 'k1', 'k2', 'k3', 'k0', 'kdot', 'lnk-recipes', 'sf-hero', 'sf-title']) {
+    const r = document.getElementById(id).getBoundingClientRect();
+    A[id] = rectOf(r.left - base.left, r.top - base.top, r.width, r.height);
+  }
+  // Elements placed by transform: their size, and the offsets of buttons inside them.
+  for (const id of ['hook0', 'hook1', 'hook2', 'pay0', 'pay1', 'pay2', 'pay3', 'wordmark', 'tagline', 'cta', 'choice', 'areaHint', 'areaBar']) {
+    el[id].style.left = '0px'; el[id].style.top = '0px'; el[id].style.transform = 'none';
+    const r = el[id].getBoundingClientRect();
+    A[id] = rectOf(0, 0, r.width, r.height);
+  }
+  const off = (child, parent) => { const c = el[child].getBoundingClientRect(), p = el[parent].getBoundingClientRect(); return rectOf(c.left - p.left, c.top - p.top, c.width, c.height); };
+  A.optWebIn = off('optWeb', 'choice');
+  A.explainIn = off('explainBtn', 'areaBar');
+  A.digits = union(...['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', 'dot'].map((k) => A['k' + k]));
+  const page = union(A['sf-hero'], A['sf-title']);
+  A.area = rectOf(page.x + 34, page.y + 18, page.w - 68, page.h - 4);
+  A.settings = rectOf(SET.left, SET.top, SET.w, SET.h);
+  A.safari = rectOf(SAF.left, SAF.top, SAF.w, SAF.h);
+}
+const RADIUS = { 'res-large': 12, textsize: 14, 'row-bluetooth': 12, digits: 43, 'lnk-recipes': 10, area: 4, cta: 48 };
+/** A control's highlight: its own geometry, padded, with concentric corners. */
+function targetRect(id) {
+  let { x, y, w, h } = A[id];
+  if (id === 'res-large') h = 98;
+  if (id === 'textsize') { x -= 30; w += 60; y -= 18; h += 36; }
+  if (id === 'lnk-recipes') { x -= 12; w += 24; y -= 8; h += 16; }
+  const pad = id === 'area' ? 0 : 7;
+  return { x: x - pad, y: y - pad, w: w + pad * 2, h: h + pad * 2, rx: (RADIUS[id] ?? 12) + pad };
+}
+
+// ───────────────────────── Timeline ─────────────────────────
+let N, CAM, PTR, DIM, UI = {};
+let TARGETS, CLICKS, EXPR, BLINKS, CARDS, CARD_POS, KEYS, LOADS;
+const CARD_W = 540;
+
+function dotsHTML(c) {
+  const shown = 7, count = c.pages, cur = c.page;
+  const first = count <= shown ? 0 : Math.max(0, Math.min(cur - 3, count - shown));
+  let s = '';
+  for (let i = first; i < Math.min(count, first + shown); i++) {
+    const more = (i === first && i > 0) || (i === first + shown - 1 && i < count - 1);
+    s += `<i class="${i === cur ? 'on' : more ? 'more' : ''}"></i>`;
+  }
+  return s;
+}
+/** Fills the guide card the way Nudge does: caption and counter, title, explanation, hint, dots, Back/Next or Finish. */
+function setCard(c) {
+  el.cardIcon.innerHTML = ICON[c.app];
+  el.cardCap.textContent = c.cap;
+  el.cardTitle.textContent = c.title;
+  el.cardMsg.textContent = c.msg;
+  el.cardHint.textContent = c.hint || '';
+  el.cardHint.style.display = c.hint ? '' : 'none';
+  el.cardDots.innerHTML = c.pages ? dotsHTML(c) : '';
+  el.cardDots.style.display = c.pages ? '' : 'none';
+  el.cardFoot.innerHTML = c.finish ? '<span></span><span class="gbtn pri">✓ Finish</span>'
+    : `<span class="gbtn${c.page ? '' : ' off'}">‹ Back</span><span class="gbtn pri">Next ›</span>`;
+}
+
+function buildTimeline() {
+  const s = A;
+  const res = s['res-large'], bt = s['row-bluetooth'], link = s['lnk-recipes'];
+  const heroSpot = [PAY.x, PAY.y - 190];
+  A.cta = rectOf(PAY.x - A.cta.w / 2, PAY.y + 250, A.cta.w, A.cta.h);
+
+  // The "Looking at…" bubble: centered in the window being read, as Nudge places it.
+  LOADS = [[T.loading, T.overview, 'Looking at System Settings…', A.settings], [T.areaLoading, T.areaCard, 'Looking at this area…', A.safari]].map(([a, b, text, win]) => {
+    el.loadText.textContent = text; el.loading.style.transform = 'none';
+    const w = el.loading.offsetWidth, h = el.loading.offsetHeight;
+    return { a, b, text, x: win.cx - w / 2, y: win.cy - h / 2 - 20, w, h };
+  });
+
+  // The guide cards, with the positions Nudge would give them beside each control.
+  CARDS = [
+    { t0: T.overview, t1: T.step1, app: 'settings', cap: 'System Settings', title: 'Exploring System Settings', msg: 'This is where you change how your Mac looks, sounds and connects.', hint: 'Press Space or choose Next to begin.', page: 0, pages: 12,
+      place: (h) => [A.settings.cx - CARD_W / 2, A.settings.cy - h / 2 - 30] },
+    { t0: T.step1, t1: T.step2, app: 'settings', cap: 'System Settings · 2 of 12', title: 'Larger Text', msg: 'Makes words and icons bigger, so everything is easier to read.', page: 1, pages: 12,
+      place: () => [res.x + 190, res.b + 36] },
+    { t0: T.step2, t1: T.step3, app: 'settings', cap: 'System Settings · 3 of 12', title: 'Text size', msg: 'Drag the slider to make text bigger or smaller.', page: 2, pages: 12,
+      place: (h) => [s.textsize.r - CARD_W + 30, s.textsize.y - h - 70] },
+    { t0: T.step3, t1: T.calc - 0.1, app: 'settings', cap: 'System Settings · 4 of 12', title: 'Bluetooth', msg: 'Connect headphones, keyboards and speakers here.', page: 3, pages: 12,
+      place: () => [bt.r + 160, bt.y - 30] },
+    { t0: T.calc + 0.08, t1: T.safariKeys - 0.05, app: 'calc', cap: 'Calculator · 2 of 6', title: 'Number keys', msg: 'Tap these to type numbers. Press = to see the answer.', page: 1, pages: 6,
+      place: () => [CALC.left + CALC.w + 50, s.digits.y + 90] },
+    { t0: T.webStep, t1: T.areaKeys - 0.05, app: 'safari', cap: 'Web page · 3 of 14', title: 'Recipes', msg: 'Goes to the recipes page on this site, where every recipe is listed.', page: 2, pages: 14,
+      place: () => [link.x + 30, link.b + 96] },
+    { t0: T.areaCard, t1: T.pause - 0.05, app: 'safari', cap: 'Safari', title: 'Grandma’s Lemon Cake', msg: 'A lemon cake recipe. The photo shows the finished cake, and it serves 8 in about an hour.', finish: true,
+      place: () => [s.area.r - CARD_W - 20, s.area.b + 30] },
+  ];
+  let prev = null;
+  for (const c of CARDS) {
+    setCard(c); el.card.style.transform = 'none';
+    c.h = el.card.offsetHeight;
+    c.pos = c.place(c.h);
+    c.runStart = prev && prev.t1 >= c.t0 - 0.01 ? prev.runStart : c.t0;
+    prev = c;
+  }
+  CARD_POS = new Track(CARDS[0].pos, S.ui);
+  for (const c of CARDS) (c.runStart === c.t0 ? CARD_POS.set(c.t0, c.pos) : CARD_POS.to(c.t0, c.pos));
+  A.choicePos = [A.safari.cx - CARD_W / 2, A.safari.cy - A.choice.h / 2 - 20];
+  A.optWeb = rectOf(A.choicePos[0] + A.optWebIn.x, A.choicePos[1] + A.optWebIn.y, A.optWebIn.w, A.optWebIn.h);
+  A.barPos = [s.area.cx - A.areaBar.w / 2, s.area.b + 22];
+  A.explain = rectOf(A.barPos[0] + A.explainIn.x, A.barPos[1] + A.explainIn.y, A.explainIn.w, A.explainIn.h);
+
+  // Keycaps for the shortcuts and Space, placed where the camera settles.
+  const ctl = ['⌃', 'control'], sh = ['⇧', 'shift'], space = ['', 'space'];
+  KEYS = [[T.keys, [ctl, sh, space], -300], [T.space1, [space], 330], [T.space2, [space], 330], [T.safariKeys, [ctl, sh, space], -320], [T.areaKeys, [ctl, sh, ['A', '']], -330]];
+
+  // Camera: center x, center y, zoom.
+  CAM = new Track([HOOK.x, HOOK.y, 1], S.camera)
+    .to(T.loading, [A.settings.cx, A.settings.cy - 10, 1.12])
+    .to(T.step1 - 0.05, [res.cx + 170, res.cy + 80, 1.38])
+    .to(T.step2 - 0.05, [s.textsize.cx - 150, s.textsize.cy - 90, 1.38])
+    .to(T.step3 - 0.05, [bt.r + 250, bt.cy + 60, 1.32])
+    .to(T.calc - 0.1, [CALC.left + 520, CALC.top + CALC.h / 2 + 10, 1.25])
+    .to(T.safariKeys - 0.1, [A.safari.cx, A.safari.cy + 10, 1.18])
+    .to(T.webStep - 0.05, [link.cx + 200, link.cy + 190, 1.36])
+    .to(T.areaKeys - 0.1, [A.safari.cx, A.safari.cy + 20, 1.16])
+    .to(T.areaCard - 0.1, [s.area.cx, s.area.cy + 150, 1.14])
+    .to(T.pause, [PAY.x + 40, PAY.y - 90, 1.16])
+    .to(T.hero, [PAY.x, PAY.y + 40, 1.02])
+    .to(T.cta, [PAY.x, PAY.y + 70, 1.045], S.slow);
+
+  // Spotlight: the window on the overview, then each highlighted control. [x, y, w, h, radius]
+  const hole = (r) => [r.x, r.y, r.w, r.h, r.rx ?? 30];
+  DIM = {
+    hole: new Track(hole(A.settings), S.ui)
+      .to(T.step1, hole(targetRect('res-large'))).to(T.step2, hole(targetRect('textsize'))).to(T.step3, hole(targetRect('row-bluetooth')))
+      .set(T.calc - 0.05, hole(targetRect('digits')))
+      .set(T.choice - 0.1, hole(A.safari)).to(T.webStep, hole(targetRect('lnk-recipes'))),
+    op: new Track(0, S.ui).to(T.overview, 1).to(T.calc - 0.12, 0).to(T.calc + 0.05, 1).to(T.safariKeys - 0.1, 0).to(T.choice, 1)
+      .to(T.areaKeys - 0.05, 0).to(T.areaDim, 1).to(T.pause - 0.05, 0),
+  };
+
+  TARGETS = [['res-large', T.step1, T.step2], ['textsize', T.step2, T.step3], ['row-bluetooth', T.step3, T.calc - 0.1],
+    ['digits', T.calc + 0.05, T.safariKeys - 0.1], ['lnk-recipes', T.webStep, T.areaKeys - 0.1], ['area', T.clickExplain + 0.04, T.pause - 0.05], ['cta', T.targetCTA, 99]];
+
+  // Nudge: beside what he explains, thinking by the "Looking at…" bubble, perched on cards with nothing to point at.
+  const load1 = LOADS[0], load2 = LOADS[1];
+  const nearRes = [res.cx + 10, res.y - 88];
+  const nearText = [s.textsize.x - 80, s.textsize.cy - 20];
+  const nearBt = [bt.r + 72, bt.cy];
+  const nearDigits = [CALC.left + CALC.w + 74, s.digits.y + 20];
+  const nearLink = [link.r + 78, link.cy + 6];
+  const nearArea = [s.area.r - 30, s.area.y - 74];
+  const perch = (p) => [p[0] + 92, p[1] - 50];
+  const aim = (from, r) => [r.cx - from[0], r.cy - from[1], 1];
+  const hook2 = { r: HOOK.x + A.hook2.w / 2, y: HOOK.y - 210 + 280, cy: HOOK.y - 210 + 280 + A.hook2.h / 2 };
+  N = {
+    pos: new Track([hook2.r - 70, hook2.cy + 10], S.travel)
+      .to(T.peek, [hook2.r + 60, hook2.y + 6], S.small)
+      .to(T.launch - 0.1, [hook2.r + 44, hook2.y + 20], S.small)
+      .to(T.launch, [HOOK.x - 40, HOOK.y - 980])
+      .set(T.loading + 0.05, [load1.x - 64, load1.y + load1.h / 2])
+      .to(T.overview, perch(CARDS[0].pos), S.small)
+      .to(T.step1, nearRes).to(T.step2, nearText).to(T.step3, nearBt)
+      .to(T.calc, nearDigits)
+      .to(T.choice, perch(A.choicePos))
+      .to(T.webStep, nearLink)
+      .set(T.areaLoading, [load2.x - 64, load2.y + load2.h / 2])
+      .to(T.areaCard, nearArea)
+      .to(T.pause, [PAY.x + 420, PAY.y - 250])
+      .to(T.hero, heroSpot)
+      .to(T.pointCTA, [heroSpot[0] + 6, heroSpot[1] + 6], S.small),
+    scale: new Track(0, S.small).to(T.peek - 0.03, 0.92).to(T.launch + 0.35, 0, S.snap)
+      .set(T.loading + 0.05, 0).to(T.loading + 0.05, 1)
+      .to(T.areaKeys + 0.05, 0).set(T.areaLoading, 0).to(T.areaLoading, 1)
+      .to(T.hero, 1.55, S.travel),
+    yaw: new Track(0, S.small).to(T.peek + 0.1, -12).to(T.notice, 0)
+      .to(T.step2, 30).to(T.step3, -35).to(T.calc, -35).to(T.choice, 10).to(T.webStep, -35).to(T.areaLoading, 0).to(T.areaCard, -20)
+      .to(T.pause + 0.2, 0).to(T.pointCTA, 10).to(T.wink, 0),
+    pitch: new Track(0, S.small)
+      .to(T.overview, 14, S.press).to(T.overview + 0.18, 0)
+      .to(T.areaCard, 14, S.press).to(T.areaCard + 0.18, 0)
+      .to(T.found + 0.05, 14, S.press).to(T.found + 0.22, 0)
+      .to(T.pointCTA, 10).to(T.wink, 0),
+    squash: new Track(0, S.press).to(T.launch - 0.1, 0.1).to(T.launch, -0.06).to(T.launch + 0.2, 0),
+    point: new Track([0, 1, 0], S.small)
+      .to(T.step1, aim(nearRes, res)).to(T.step2, aim(nearText, s.textsize)).to(T.step3, aim(nearBt, bt))
+      .to(T.calc, aim(nearDigits, s.digits)).to(T.choice - 0.05, [0, 1, 0])
+      .to(T.webStep, aim(nearLink, link)).to(T.areaKeys, [0, 1, 0])
+      .to(T.areaCard, aim(nearArea, s.area)).to(T.pause, [0, 1, 0])
+      .to(T.pointCTA, [0.02, 1, 1.1]),
+    wave: [[T.notice - 0.05, T.launch - 0.12], [T.overview + 0.05, T.step1 - 0.05], [T.hero + 0.3, T.cta - 0.05]],
+  };
+  // Expressions follow Nudge's real moods: thinking while reading, cheery when a guide is ready, curious when asking.
+  EXPR = [
+    [0, 'open', 'smile'], [T.notice - 0.02, 'wide', 'o'], [T.notice + 0.2, 'open', 'smile'],
+    [T.loading + 0.05, 'open', 'o'], [T.overview, 'happy', 'grin'], [T.overview + 0.6, 'open', 'smile'],
+    [T.choice, 'wide', 'o'], [T.webStep, 'open', 'smile'],
+    [T.areaLoading, 'open', 'o'], [T.areaCard, 'happy', 'grin'], [T.areaCard + 0.6, 'open', 'smile'],
+    [T.found, 'happy', 'grin'], [T.found + 0.55, 'open', 'smile'], [T.wink, 'wink', 'grin'],
+  ];
+  BLINKS = [0.62, 3.9, 6.6, 9.9, 13.4, 15.1, 16.95, 18.72];
+  UI.look = [
+    [0, null], [T.loading + 0.05, [load1.x + 300, load1.y - 400]], [T.overview, null],
+    [T.step1, [res.cx, res.cy]], [T.click1 - 0.3, 'pointer'], [T.step2, [s.textsize.cx, s.textsize.cy]], [T.step3, [bt.cx, bt.cy]],
+    [T.calc, [s.digits.cx, s.digits.cy]], [T.choice, null], [T.webStep, [link.cx, link.cy]],
+    [T.areaLoading, [load2.x + 300, load2.y - 400]], [T.areaCard, [s.area.cx, s.area.cy]], [T.pause, null],
+    [T.pointCTA, [A.cta.cx, A.cta.cy]], [T.wink, null],
+  ];
+
+  // The pointer is always the person's. They click Larger Text, choose "This web page", drag a box and ask for it to be explained.
+  PTR = {
+    pos: new Track([res.r + 280, res.b + 240], [0.45, 0.95])
+      .to(T.click1 - 0.32, [res.cx + 16, res.cy + 12], [0.35, 0.95])
+      .to(T.click1 + 0.2, [res.cx + 140, res.b + 150], [0.5, 1])
+      .set(T.clickWeb - 0.4, [A.optWeb.r + 220, A.optWeb.b + 170])
+      .to(T.clickWeb - 0.36, [A.optWeb.cx + 90, A.optWeb.cy + 10], [0.3, 0.95])
+      .to(T.clickWeb + 0.2, [A.optWeb.r + 160, A.optWeb.b + 150], [0.5, 1])
+      .set(T.areaDim + 0.02, [s.area.x + 160, s.area.y + 120])
+      .to(T.areaDim + 0.05, [s.area.x, s.area.y], [0.2, 0.95])
+      .set(T.dragEnd, [s.area.r, s.area.b])
+      .to(T.dragEnd + 0.06, [A.explain.cx + 10, A.explain.cy + 8], [0.3, 0.95]),
+    visible: [[0, 0], [T.click1 - 0.35, 1], [T.click1 + 0.45, 0], [T.clickWeb - 0.4, 1], [T.clickWeb + 0.35, 0], [T.areaDim, 1], [T.clickExplain + 0.25, 0]],
+  };
+  CLICKS = [T.click1, T.clickWeb, T.clickExplain];
+}
+
+// ───────────────────────── Rendering ─────────────────────────
+const px = (v) => v.toFixed(2) + 'px';
+function place(node, x, y, extra = '') { node.style.transform = `translate(${px(x)}, ${px(y)}) ${extra}`; }
+function renderCamera(t) {
+  const [cx, cy, z] = CAM.at(t);
+  world.style.transform = `translate(720px, 720px) scale(${z.toFixed(4)}) translate(${px(-cx)}, ${px(-cy)})`;
+  // The wallpaper moves at 70% of the camera, for depth.
+  const zw = 1 + (z - 1) * 0.7;
+  el.wall.style.transform = `translate(720px, 720px) scale(${zw.toFixed(4)}) translate(${px(WALL.x - cx * 0.7)}, ${px(WALL.y - cy * 0.7)})`;
+}
+function renderHook(t) {
+  const push = [[-1300, -140, -9], [1300, 60, 7], [-1250, 220, -6]];
+  const hitAt = [T.launch + 0.1, T.launch + 0.04, T.launch - 0.02];
+  for (let i = 0; i < 3; i++) {
+    const a = A['hook' + i];
+    const inP = springStep(t - (T.hookIn + i * 0.07), S.type), outP = springStep(t - hitAt[i], [0.5, 0.86]);
+    el['hook' + i].style.opacity = (clamp(inP * 1.4, 0, 1) * (1 - fade(t, hitAt[i] + 0.35, 0.2))).toFixed(3);
+    place(el['hook' + i], HOOK.x - a.w / 2 + push[i][0] * outP, HOOK.y - 210 + i * 140 + (1 - inP) * 70 + push[i][1] * outP, `rotate(${(push[i][2] * outP).toFixed(2)}deg)`);
+  }
+}
+function renderSettings(t) {
+  el['pane-displays'].style.transform = `scale(${(1 + 0.08 * springStep(t - (T.click1 + 0.08), S.ui)).toFixed(4)})`;
+  el.setSel.style.top = px(A['row-displays'].y - A.setRows.y);
+  const larger = t >= T.click1 + 0.02;
+  el['res-large'].classList.toggle('on', larger);
+  el['res-default'].classList.toggle('on', !larger);
+}
+function renderKeys(t) {
+  const ev = KEYS.filter(([time]) => t >= time - 0.01 && t < time + 0.7).pop();
+  for (let i = 0; i < 3; i++) el['key' + i].style.opacity = 0;
+  if (!ev) return;
+  const [time, keys, dy] = ev;
+  const [cx, cy, z] = CAM.at(time + 0.35);
+  const widths = keys.map(([, label]) => (label === 'space' ? 230 : label ? 116 : 96));
+  const total = widths.reduce((a, b) => a + b, 0) + (keys.length - 1) * 14;
+  let x = -total / 2;
+  keys.forEach(([sym, label], i) => {
+    const k = el['key' + i];
+    if (k.dataset.label !== sym + label) { k.innerHTML = `<b>${sym || '&nbsp;'}</b>${label}`; k.dataset.label = sym + label; }
+    k.style.width = widths[i] + 'px';
+    const inP = springStep(t - (time + i * 0.05), S.press), press = within(t, time + 0.16, time + 0.34, 0.04, 0.08), out = fade(t, time + 0.5, 0.18);
+    k.style.opacity = (clamp(inP, 0, 1) * (1 - out)).toFixed(3);
+    k.style.filter = `brightness(${(1 - press * 0.12).toFixed(3)})`;
+    place(k, cx + (x / z), cy + dy / z + (press * 7 - out * 30) / z, `scale(${((0.6 + 0.4 * inP) / z).toFixed(4)})`);
+    k.style.transformOrigin = '0 0';
+    x += widths[i] + 14;
+  });
+}
+function renderLoading(t) {
+  const L = LOADS.find((l) => t >= l.a && t < l.b + 0.2);
+  if (!L) { el.loading.style.opacity = 0; return; }
+  if (el.loadText.textContent !== L.text) el.loadText.textContent = L.text;
+  const inP = springStep(t - L.a, S.ui), out = fade(t, L.b, 0.15);
+  el.loading.style.opacity = (clamp(inP * 1.4, 0, 1) * (1 - out)).toFixed(3);
+  place(el.loading, L.x, L.y, `scale(${(0.85 + 0.15 * inP).toFixed(4)})`);
+  el.spin.style.transform = `rotate(${(t * 420).toFixed(1)}deg)`;
+}
+let shownCard = null;
+function renderCard(t) {
+  const cur = CARDS.filter((c) => t >= c.t0).pop();
+  const c = cur && t < cur.t1 + 0.25 ? cur : null;
+  if (!c) { el.card.style.opacity = 0; return; }
+  if (shownCard !== c) { setCard(c); shownCard = c; }
+  const [x, y] = CARD_POS.at(t);
+  const inP = springStep(t - c.runStart, S.ui), out = fade(t, c.t1, 0.18), text = fade(t, c.t0, 0.2);
+  el.cardBody.style.opacity = text.toFixed(3);
+  el.cardBody.style.transform = `translateX(${px((1 - text) * 16)})`;
+  el.card.style.opacity = (clamp(inP * 1.4, 0, 1) * (1 - out)).toFixed(3);
+  place(el.card, x, y, `scale(${(0.94 + 0.06 * inP).toFixed(4)})`);
+}
+function renderChoice(t) {
+  const inP = springStep(t - T.choice, S.ui), out = fade(t, T.clickWeb + 0.12, 0.18);
+  el.choice.style.opacity = (clamp(inP * 1.4, 0, 1) * (1 - out)).toFixed(3);
+  place(el.choice, A.choicePos[0], A.choicePos[1], `scale(${(0.94 + 0.06 * inP).toFixed(4)})`);
+  el.optWeb.style.filter = `brightness(${(1 - within(t, T.clickWeb, T.clickWeb + 0.14, 0.03, 0.1) * 0.15).toFixed(3)})`;
+}
+/** The box being dragged out, growing from its first corner with the pointer. */
+function areaBox(t) {
+  const p = smooth(clamp((t - T.dragStart) / (T.dragEnd - T.dragStart), 0, 1));
+  return rectOf(A.area.x, A.area.y, Math.max(1, A.area.w * p), Math.max(1, A.area.h * p));
+}
+function renderArea(t) {
+  const selecting = t >= T.areaDim && t < T.clickExplain + 0.05;
+  const box = areaBox(t);
+  const showBox = selecting && t >= T.dragStart;
+  el.areaBox.setAttribute('opacity', showBox ? 1 : 0);
+  el.areaBox.setAttribute('x', box.x); el.areaBox.setAttribute('y', box.y); el.areaBox.setAttribute('width', box.w); el.areaBox.setAttribute('height', box.h);
+  const handles = [[box.x, box.y], [box.cx, box.y], [box.r, box.y], [box.r, box.cy], [box.r, box.b], [box.cx, box.b], [box.x, box.b], [box.x, box.cy]];
+  [...el.areaHandles.children].forEach((c, i) => { c.setAttribute('cx', handles[i][0]); c.setAttribute('cy', handles[i][1]); });
+  el.areaHandles.setAttribute('opacity', selecting && t >= T.dragEnd ? fade(t, T.dragEnd, 0.1) : 0);
+  const hint = within(t, T.areaDim + 0.05, T.dragStart + 0.05, 0.15, 0.15);
+  el.areaHint.style.opacity = hint.toFixed(3);
+  place(el.areaHint, A.safari.cx - A.areaHint.w / 2, SAF.top + 150, '');
+  const barIn = springStep(t - (T.dragEnd + 0.05), S.ui), barOut = fade(t, T.clickExplain + 0.06, 0.12);
+  el.areaBar.style.opacity = (t >= T.dragEnd ? clamp(barIn * 1.4, 0, 1) * (1 - barOut) : 0).toFixed(3);
+  place(el.areaBar, A.barPos[0], A.barPos[1], `scale(${(0.9 + 0.1 * barIn).toFixed(4)})`);
+  el.explainBtn.style.filter = `brightness(${(1 - within(t, T.clickExplain, T.clickExplain + 0.14, 0.03, 0.1) * 0.15).toFixed(3)})`;
+}
+function roundRect(x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  return `M${x + r},${y}H${x + w - r}A${r},${r} 0 0 1 ${x + w},${y + r}V${y + h - r}A${r},${r} 0 0 1 ${x + w - r},${y + h}H${x + r}A${r},${r} 0 0 1 ${x},${y + h - r}V${y + r}A${r},${r} 0 0 1 ${x + r},${y}Z`;
+}
+function renderDim(t) {
+  let hole = DIM.hole.at(t);
+  // While choosing an area, and while it's explained, the chosen box stays clear.
+  if (t >= T.areaDim) { const b = t < T.dragStart ? rectOf(A.area.x, A.area.y, 0, 0) : areaBox(t); hole = [b.x, b.y, b.w, b.h, 4]; }
+  const op = clamp(DIM.op.at(t), 0, 1);
+  el.dimPath.setAttribute('d', `M-20000,-20000H20000V20000H-20000Z ${hole[2] > 1 ? roundRect(...hole) : ''}`);
+  el.dimPath.setAttribute('opacity', (op * 0.45).toFixed(3));
+}
+function renderPayoff(t) {
+  const x0 = PAY.x, y0 = PAY.y - 330;
+  const inL = springStep(t - T.lessType, S.type), inQ = springStep(t - (T.lessType + 0.07), S.type);
+  // The old line clears before the new one arrives, so they never overlap.
+  const swap = springStep(t - (T.found + 0.1), S.type), swapQ = springStep(t - (T.found + 0.15), S.type);
+  const gone = 1 - fade(t, T.found, 0.1), goneQ = 1 - fade(t, T.found + 0.04, 0.1);
+  const out = springStep(t - T.hero, S.ui);
+  const lines = [['pay0', inL * gone, 0, -(1 - gone) * 50, inL], ['pay1', inQ * goneQ, 1, -(1 - goneQ) * 50, inQ],
+    ['pay2', swap, 0, (1 - swap) * 60, inL], ['pay3', swapQ, 1, (1 - swapQ) * 60, inQ]];
+  for (const [id, vis, row, dy, enter] of lines) {
+    el[id].style.opacity = (clamp(vis, 0, 1) * (1 - out)).toFixed(3);
+    place(el[id], x0 - A[id].w / 2, y0 + row * 136 + dy + (1 - enter) * 60 - out * 120, '');
+  }
+  const wm = springStep(t - T.wordmark, S.type), tg = springStep(t - T.tagline, S.type), ct = springStep(t - T.cta, S.ui);
+  el.wordmark.style.opacity = clamp(wm * 1.3, 0, 1).toFixed(3);
+  place(el.wordmark, PAY.x - A.wordmark.w / 2, PAY.y - 60 + (1 - wm) * 70, `scale(${(0.94 + 0.06 * wm).toFixed(4)})`);
+  el.tagline.style.opacity = clamp(tg * 1.3, 0, 1).toFixed(3);
+  place(el.tagline, PAY.x - A.tagline.w / 2, PAY.y + 140 + (1 - tg) * 40, '');
+  el.cta.style.opacity = clamp(ct * 1.4, 0, 1).toFixed(3);
+  place(el.cta, A.cta.x, A.cta.y + (1 - ct) * 40, `scale(${(0.86 + 0.14 * ct).toFixed(4)})`);
+}
+function renderTargets(t) {
+  const active = TARGETS.filter(([, a, b]) => t >= a && t < b + 0.3).slice(-2);
+  for (let i = 0; i < 2; i++) {
+    const g = el['tg' + i], tg = active[i];
+    if (!tg) { g.setAttribute('opacity', 0); continue; }
+    const [id, a, b] = tg;
+    const r = targetRect(id);
+    const appear = springStep(t - a, S.target), leave = fade(t, b, 0.16);
+    const sc = 1.07 - 0.07 * appear + 0.03 * leave, cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    g.setAttribute('opacity', (clamp(appear * 1.6, 0, 1) * (1 - leave)).toFixed(3));
+    g.setAttribute('transform', `translate(${cx} ${cy}) scale(${sc.toFixed(4)}) translate(${-cx} ${-cy})`);
+    const perim = 2 * (r.w + r.h - 4 * r.rx) + 2 * Math.PI * r.rx;
+    for (const cls of ['tglow', 'tfill', 'tmain', 'tsweep']) {
+      const node = g.querySelector('.' + cls);
+      node.setAttribute('x', r.x); node.setAttribute('y', r.y); node.setAttribute('width', r.w); node.setAttribute('height', r.h);
+      node.setAttribute('rx', r.rx); node.setAttribute('ry', r.rx);
+    }
+    const draw = fade(t, a, 0.32), main = g.querySelector('.tmain'), sweep = g.querySelector('.tsweep');
+    main.setAttribute('stroke-dasharray', `${perim} ${perim}`);
+    main.setAttribute('stroke-dashoffset', (perim * (1 - draw)).toFixed(1));
+    const seg = Math.min(70, perim * 0.12);
+    sweep.setAttribute('stroke-dasharray', `${seg} ${perim - seg}`);
+    sweep.setAttribute('stroke-dashoffset', (-(t - a) * 360).toFixed(1));
+    sweep.setAttribute('opacity', (draw * 0.9).toFixed(3));
+  }
+}
+let lastPointer = [0, 0];
+function renderPointer(t) {
+  let [x, y] = PTR.pos.at(t);
+  // Dragging out the area: the pointer carries the box's far corner.
+  if (t >= T.dragStart && t < T.dragEnd) { const b = areaBox(t); x = b.r; y = b.b; }
+  lastPointer = [x, y];
+  const vis = PTR.visible.reduce((v, [time, o], i, arr) => (t >= time ? { time, o, prev: i ? arr[i - 1][1] : 0 } : v), { time: 0, o: 0, prev: 0 });
+  const o = lerp(vis.prev, vis.o, fade(t, vis.time, 0.15));
+  let press = t >= T.dragStart - 0.05 && t < T.dragEnd + 0.03 ? 1 : 0;
+  for (const ct of CLICKS) press = Math.max(press, within(t, ct, ct + 0.13, 0.03, 0.1));
+  el.pointer.setAttribute('transform', `translate(${(x - 3 * 1.25).toFixed(2)} ${(y - 2 * 1.25).toFixed(2)}) scale(${(1.25 * (1 - press * 0.1)).toFixed(4)})`);
+  el.pointer.setAttribute('opacity', o.toFixed(3));
+}
+
+// Nudge, frame by frame.
+function renderNudge(t) {
+  const dt = 1 / 120;
+  let [x, y] = N.pos.at(t);
+  const [xp, yp] = N.pos.at(t - dt);
+  const vx = (x - xp) / dt, vy = (y - yp) / dt;
+  const speed = Math.hypot(vx, vy);
+  const scale = N.scale.at(t);
+  // A gentle float while hovering.
+  const bob = Math.sin(t * Math.PI * 2 * 0.55) * 4 * clamp(1 - speed / 600, 0, 1);
+  y += bob;
+  // Hidden behind the hook's type until he launches.
+  el.nudgeWrap.style.zIndex = t < T.launch ? 1 : 50;
+  el.nudgeWrap.style.transform = `translate(${px(x)}, ${px(y)})`;
+  el.nudgeWrap.style.opacity = scale > 0.02 ? 1 : 0;
+
+  // Turn toward travel; profile when zipping sideways.
+  let yaw = N.yaw.at(t) + clamp(vx * 0.03, -72, 72) * clamp(speed / 700, 0, 1);
+  const pitch = N.pitch.at(t) + clamp(vy * 0.006, -10, 10);
+  const squash = N.squash.at(t);
+  // Stretch along the motion, lean into it.
+  const stretch = Math.min(speed / 2600, 0.13);
+  const ang = Math.atan2(vy, vx) * 180 / Math.PI;
+  const lean = clamp(vx / 95, -13, 13);
+  const sx = (1 + squash * 0.6) * scale, sy = (1 - squash) * scale;
+  el.nRig.setAttribute('transform',
+    `rotate(${lean.toFixed(2)}) rotate(${ang.toFixed(2)}) scale(${(1 + stretch).toFixed(4)} ${(1 - stretch * 0.55).toFixed(4)}) rotate(${(-ang).toFixed(2)}) scale(${sx.toFixed(4)} ${sy.toFixed(4)})`);
+  el.nShadow.setAttribute('opacity', (clamp(1 - speed / 1600, 0.2, 1) * scale).toFixed(3));
+  el.nShadow.setAttribute('transform', `translate(0 ${(-bob).toFixed(2)}) scale(${(scale * (1 - bob / 60)).toFixed(3)})`);
+  // A brief trail at speed.
+  const k = clamp((speed - 900) / 1800, 0, 1) * scale;
+  for (const [id, lag, o] of [['ghost1', 0.022, 0.22], ['ghost2', 0.045, 0.1]]) {
+    const [gx, gy] = N.pos.at(t - lag);
+    el[id].setAttribute('opacity', (k * o).toFixed(3));
+    el[id].setAttribute('transform', `translate(${(gx - x).toFixed(2)} ${(gy - (y - bob)).toFixed(2)})`);
+  }
+
+  // Face: features sit on the sphere and turn with it.
+  const rad = Math.PI / 180;
+  const pitchY = R * 0.42 * Math.sin(pitch * rad);
+  let look = schedule(t, UI.look);
+  if (look === 'pointer') look = lastPointer;
+  let gx = 0, gy = 0;
+  if (look) { const d = Math.hypot(look[0] - x, look[1] - y) || 1; gx = (look[0] - x) / d; gy = (look[1] - y) / d; }
+  const gazeX = gx * 5, gazeY = gy * 4;
+  const expr = schedule(t, EXPR.map(([time, eyes, mouth]) => [time, { eyes, mouth }]));
+  const blink = BLINKS.some((b) => t >= b && t < b + 0.12) && expr.eyes === 'open';
+  const eye = (id, offset) => {
+    const a = (yaw + offset) * rad;
+    const z = Math.cos(a);
+    const g = el[id];
+    const ex = R * 0.8 * Math.sin(a) + gazeX, ey = -R * 0.04 + pitchY + gazeY;
+    const w = Math.pow(clamp(z, 0, 1), 0.75);
+    g.style.display = z < 0.12 ? 'none' : '';
+    g.setAttribute('transform', `translate(${ex.toFixed(2)} ${ey.toFixed(2)}) scale(${(w * (expr.eyes === 'wide' ? 1.12 : 1)).toFixed(3)} ${(expr.eyes === 'wide' ? 1.1 : 1)})`);
+    const ball = g.querySelector('.ball'), arc = g.querySelector('.arc');
+    const right = offset > 0;
+    const happy = expr.eyes === 'happy' || (expr.eyes === 'wink' && right);
+    ball.parentNode.style.display = happy ? 'none' : '';
+    arc.style.display = happy ? '' : 'none';
+    arc.setAttribute('d', 'M-10 4 Q0 -12 10 4');
+    const lid = el[right ? 'lidR' : 'lidL'];
+    const lidTop = expr.eyes === 'half' ? -2 : (blink ? 8 : -30);
+    lid.setAttribute('y', lidTop); lid.setAttribute('height', 60);
+    g.querySelector('.hl1').setAttribute('cx', -3.2); g.querySelector('.hl1').setAttribute('cy', -5.2);
+    g.querySelector('.hl2').setAttribute('cx', 3.6); g.querySelector('.hl2').setAttribute('cy', 5.2);
+  };
+  eye('eyeL', -24); eye('eyeR', 24);
+  for (const [id, off] of [['cheekL', -42], ['cheekR', 42]]) {
+    const a = (yaw + off) * rad, z = Math.cos(a);
+    el[id].setAttribute('cx', (R * 0.78 * Math.sin(a)).toFixed(2));
+    el[id].setAttribute('cy', (R * 0.2 + pitchY).toFixed(2));
+    el[id].setAttribute('opacity', (clamp(z, 0, 1) * 0.75).toFixed(3));
+    el[id].setAttribute('rx', (8 * Math.pow(clamp(z, 0, 1), 0.7)).toFixed(2));
+  }
+  const ma = yaw * rad, mz = Math.cos(ma);
+  const mx = R * 0.8 * Math.sin(ma), my = R * 0.26 + pitchY;
+  const mw = Math.pow(clamp(mz, 0, 1), 0.8);
+  el.mouth.style.display = mz < 0.15 ? 'none' : '';
+  el.mouth.setAttribute('transform', `translate(${mx.toFixed(2)} ${my.toFixed(2)}) scale(${mw.toFixed(3)} 1)`);
+  const shape = el.mouthShape, line = el.mouthLine, tongue = el.tongue;
+  if (expr.mouth === 'smile' || expr.mouth === 'grin') {
+    const w = expr.mouth === 'grin' ? 13 : 10, d = expr.mouth === 'grin' ? 12 : 9;
+    shape.setAttribute('d', `M${-w} 0 L${w} 0 Q${w} ${d} 0 ${d} Q${-w} ${d} ${-w} 0 Z`);
+    shape.style.display = ''; line.style.display = 'none'; tongue.style.display = '';
+    tongue.setAttribute('cy', d * 0.62); tongue.setAttribute('rx', w * 0.5);
+  } else if (expr.mouth === 'o') {
+    shape.setAttribute('d', 'M-5 3 a5 6 0 1 0 10 0 a5 6 0 1 0 -10 0 Z');
+    shape.style.display = ''; line.style.display = 'none'; tongue.style.display = 'none';
+  } else {
+    line.setAttribute('d', 'M-7 5 L7 5'); line.style.display = ''; shape.style.display = 'none'; tongue.style.display = 'none';
+  }
+  const faceVisible = Math.cos(yaw * rad) > -0.2;
+  el.nFace.style.display = faceVisible ? '' : 'none';
+  el.nWisp.setAttribute('cx', (-R * 0.46 * Math.cos(yaw * rad * 0.7)).toFixed(2));
+
+  // Arms: the pointing arm reaches toward its target; the other rests. Each arm is behind or in front of the body by depth.
+  const [pdx, pdy, pamt] = N.point.at(t);
+  const pointAng = Math.atan2(pdy, pdx) * 180 / Math.PI;
+  const waving = N.wave.some(([a, b]) => t >= a && t < b);
+  const sides = [['L', -92], ['R', 92]];
+  for (const [side, off] of sides) {
+    const a = (yaw + off) * rad;
+    const bx = R * 0.9 * Math.sin(a), by = R * 0.2 + pitchY * 0.3;
+    const depth = Math.cos(a);
+    const isRight = side === 'R';
+    const rest = isRight ? 52 : 128;
+    let ang = rest, len = 1;
+    const pointsThisSide = pamt > 0.05 && ((pdx >= 0) === isRight);
+    if (pointsThisSide) {
+      const p = clamp(pamt, 0, 1.4);
+      ang = lerp(rest, pointAng, clamp(p, 0, 1));
+      len = 1 + 0.35 * p + 0.04 * Math.sin(t * 22) * clamp(p - 1, 0, 1) * 4;
+    } else if (waving && isRight) {
+      ang = -40 + Math.sin(t * 16) * 22;
+    }
+    const front = depth > -0.05;
+    const on = el['arm' + (front ? 'Front' : 'Back') + side], off2 = el['arm' + (front ? 'Back' : 'Front') + side];
+    off2.style.display = 'none'; on.style.display = '';
+    on.setAttribute('transform', `translate(${bx.toFixed(2)} ${by.toFixed(2)}) rotate(${ang.toFixed(2)}) scale(${len.toFixed(3)} 1)`);
+  }
+  return { x, y };
+}
+
+function seek(t) {
+  t = clamp(t, 0, T.duration);
+  renderCamera(t);
+  renderHook(t);
+  renderSettings(t);
+  renderKeys(t);
+  renderLoading(t);
+  renderCard(t);
+  renderChoice(t);
+  renderArea(t);
+  renderDim(t);
+  renderPayoff(t);
+  renderTargets(t);
+  renderPointer(t);
+  renderNudge(t);
+}
+
+// ───────────────────────── Start ─────────────────────────
+async function init() {
+  paintWallpaper();
+  build();
+  setupArms();
+  await document.fonts.ready;
+  measure();
+  buildTimeline();
+  seek(0);
+  if (!RENDER) setupPreview();
+  window.__ready = true;
+}
+function setupPreview() {
+  const frame = document.getElementById('frame');
+  const fit = () => {
+    const s = Math.min(innerWidth / 1440, (innerHeight - 56) / 1440);
+    frame.style.transform = `translate(${(innerWidth - 1440 * s) / 2}px, 0) scale(${s})`;
+  };
+  fit(); addEventListener('resize', fit);
+  const music = document.getElementById('music'), play = document.getElementById('play'), scrub = document.getElementById('scrub'), time = document.getElementById('time');
+  scrub.max = T.duration;
+  let playing = false;
+  const show = (t) => { seek(t); scrub.value = t; time.textContent = t.toFixed(2) + ' s'; };
+  const loop = () => { if (!playing) return; const t = music.currentTime; show(t); if (t >= T.duration - 0.01 || music.ended) { playing = false; play.textContent = 'Play'; return; } requestAnimationFrame(loop); };
+  play.onclick = () => {
+    playing = !playing; play.textContent = playing ? 'Pause' : 'Play';
+    if (playing) { if (music.currentTime >= T.duration - 0.05) music.currentTime = 0; music.play(); requestAnimationFrame(loop); } else music.pause();
+  };
+  scrub.oninput = () => { music.currentTime = +scrub.value; show(+scrub.value); };
+  addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); play.onclick(); } });
+}
+window.seek = seek;
+window.DURATION = T.duration;
+init();
+</script>
+</body>
+</html>

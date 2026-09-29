@@ -1,0 +1,9 @@
+# Maintainers are asked to review every pull request.
+*                        @Ezra-Black
+
+# The brand is licensed separately; changes need the owner's review.
+/Sources/Nudge/Brand/    @Ezra-Black
+/docs/images/            @Ezra-Black
+/marketing/              @Ezra-Black
+/LICENSE*                @Ezra-Black
+/TRADEMARKS.md           @Ezra-Black

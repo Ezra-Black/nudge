@@ -1,0 +1,20 @@
+Nudge
+Copyright 2026 Ezra Black
+
+The Nudge source code is licensed under the Apache License, Version 2.0 (see LICENSE),
+except for the Nudge brand assets, which are licensed separately (see LICENSE-BRAND.md).
+
+"Nudge" and the Nudge character are trademarks of Ezra Black. The Apache License does
+not grant permission to use them (Apache License 2.0, section 6). See TRADEMARKS.md.
+
+This product includes the following third-party software in the guide engine
+(engine/), each under the license shown:
+
+  serde, serde_json, itoa           MIT OR Apache-2.0
+  ryu                               Apache-2.0 OR BSL-1.0
+  memchr                            Unlicense OR MIT
+
+Used only while building the engine:
+
+  serde_derive, proc-macro2, quote, syn   MIT OR Apache-2.0
+  unicode-ident                           (MIT OR Apache-2.0) AND Unicode-DFS-2016

@@ -1,0 +1,32 @@
+name: Feature request
+description: An idea to make Nudge more helpful.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's hard today?
+      description: Describe the problem or the moment of confusion, not just the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+    validations:
+      required: true
+  - type: textarea
+    id: who
+    attributes:
+      label: Who would this help?
+      description: For example, someone new to email, someone with low vision, a family member setting Nudge up.
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Nudge's promises
+      description: Nudge keeps everything on the Mac and never acts for the person.
+      options:
+        - label: This idea works without sending anything off the Mac
+          required: true
+        - label: This idea doesn't need Nudge to click or type for the person
+          required: true

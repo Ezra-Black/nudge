@@ -1,0 +1,36 @@
+
+not json
+{"version":1,"command":"hello"
+[1,2,3]
+{}
+{"command": "hello"}
+{"version": 2, "command": "hello"}
+{"version": "1", "command": "hello"}
+{"version": 1.0, "command": "hello"}
+{"version": 1}
+{"version": 1, "command": "dance"}
+{"version": 1, "command": "hello", "extra": [1, 2]}
+   {"version": 1, "command": "hello"}   
+{"version": 1, "command": "next"}
+{"version": 1, "command": "back"}
+{"version": 1, "command": "replay"}
+{"version": 1, "command": "goto"}
+{"version": 1, "command": "goto", "index": -1}
+{"version": 1, "command": "goto", "index": 3}
+{"version": 1, "command": "install", "request": "r"}
+{"version": 1, "command": "explain", "request": "r"}
+{"version": 1, "command": "explain", "request": "r", "batch": 0}
+{"version": 1, "command": "observe"}
+{"version": 1, "command": "observe", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": -1, "elements": []}}
+{"version": 1, "command": "observe", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": 1, "elements": []}}
+{"version": 1, "command": "prepare", "request": "r"}
+{"version": 1, "command": "prepare", "request": "r", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": 1, "elements": []}}
+{"version": 1, "command": "prepare", "request": "r", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": 1, "elements": [{"id": "1", "label": "", "role": "AXButton", "bounds": {"x": 0.1, "y": 0.1, "width": 0.1, "height": 0.1}, "source": "ax"}, {"id": "2", "label": "Wide", "role": "AXButton", "bounds": {"x": 0.5, "y": 0.1, "width": 0.6, "height": 0.1}, "source": "ax"}, {"id": "3", "label": "Flat", "role": "AXButton", "bounds": {"x": 0.1, "y": 0.1, "width": 0.1, "height": 0.0}, "source": "ax"}, {"id": "4", "label": "Left", "role": "AXButton", "bounds": {"x": -0.1, "y": 0.1, "width": 0.2, "height": 0.1}, "source": "ax"}]}}
+{"version": 1, "command": "prepare", "request": "r", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": 1, "elements": [{"id": "1", "label": "No source", "role": "AXButton", "bounds": {"x": 0.1, "y": 0.1, "width": 0.1, "height": 0.1}}]}}
+{"version": 1, "command": "install", "request": "r", "plan": {"title": "t", "introduction": "i", "conclusion": "c", "steps": []}}
+{"version": 1, "command": "prepare", "request": "r2", "observation": {"app": "A", "bundle": "b", "window": "w", "window_id": 1, "elements": [{"id": "1", "label": "OK", "role": "AXButton", "bounds": {"x": 0.1, "y": 0.1, "width": 0.1, "height": 0.1}, "source": "ax"}]}}
+{"version": 1, "command": "install", "request": "r2", "plan": "not a plan"}
+{"version": 1, "command": "install", "request": "r2", "plan": {"title": "t", "introduction": "i", "conclusion": "c", "steps": []}}
+{"version": 1, "command": "cancel"}
+{"version": 1, "command": "clear"}
+{"version": 1, "command": "next"}

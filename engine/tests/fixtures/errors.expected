@@ -1,0 +1,36 @@
+{"error":"Invalid JSON","ok":false}
+{"error":"Invalid JSON","ok":false}
+{"error":"Invalid JSON","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unsupported protocol version","ok":false}
+{"error":"Unknown command","ok":false}
+{"error":"Unknown command","ok":false}
+{"data":{"engine":"Nudge","network":false,"protocol":1},"ok":true}
+{"data":{"engine":"Nudge","network":false,"protocol":1},"ok":true}
+{"data":{"status":"idle"},"ok":true}
+{"data":{"status":"idle"},"ok":true}
+{"data":{"status":"idle"},"ok":true}
+{"error":"Missing step index","ok":false}
+{"error":"Missing step index","ok":false}
+{"data":{"status":"idle"},"ok":true}
+{"error":"No pending interpretation","ok":false}
+{"error":"Missing batch","ok":false}
+{"error":"No guide is active","ok":false}
+{"error":"Invalid observation: invalid type: null, expected struct Observation","ok":false}
+{"error":"Invalid observation: invalid value: integer `-1`, expected u32","ok":false}
+{"data":{"status":"idle"},"ok":true}
+{"error":"Invalid observation: invalid type: null, expected struct Observation","ok":false}
+{"error":"I couldn’t read any labeled controls. Try a website or a standard Mac app.","ok":false}
+{"error":"I couldn’t read any labeled controls. Try a website or a standard Mac app.","ok":false}
+{"data":{"batches":[],"cached":false,"prompt":"App: A. Window: w.\nVisible items (number | kind | label | position | part of window | details):\n0 | button | No source | top left\nWrite an overview of this window: what it is, what it is showing right now, and what someone can do here as a whole. Each button is explained separately afterwards.","request":"r"},"ok":true}
+{"data":{"bounds":null,"goal":"","index":0,"plan":{"conclusion":"c","continues":false,"introduction":"i","steps":[],"title":"t"},"status":"complete","target_source":null},"ok":true}
+{"data":{"batches":["App: A. Window: w.\nItems (number | kind | label | position | part of window | details):\n1 | button | OK | top left\nExplain every item above: one entry per item, in order, using the same numbers. Explain the purpose, not just the name: what happens when someone uses it and why they would. Use what you know about A and common Mac and website conventions. For a link, say where it goes and why someone would go there. For a field, say what to type there. For a group, explain what its controls are for together and how to use them. For an area, say what that part of the window is for. Never just repeat the label."],"cached":false,"prompt":"App: A. Window: w.\nVisible items (number | kind | label | position | part of window | details):\n0 | button | OK | top left\nWrite an overview of this window: what it is, what it is showing right now, and what someone can do here as a whole. Each button is explained separately afterwards.","request":"r2"},"ok":true}
+{"error":"Invalid plan: invalid type: string \"not a plan\", expected struct Plan","ok":false}
+{"error":"No pending interpretation","ok":false}
+{"data":{"status":"cancelled"},"ok":true}
+{"data":{"status":"idle"},"ok":true}
+{"data":{"status":"idle"},"ok":true}

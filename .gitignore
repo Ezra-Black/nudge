@@ -1,0 +1,24 @@
+# Build output
+.build/
+build/
+engine/target/
+*.app
+*.iconset
+
+# Local settings (signing identity, app location). See .env.example.
+.env
+
+# Xcode and SwiftPM
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+DerivedData/
+
+# Rendered marketing media. Regenerate with marketing/ad/render.mjs.
+marketing/ad/*.mp4
+marketing/ad/*.wav
+marketing/ad/frames/
+node_modules/
+
+# macOS
+.DS_Store
