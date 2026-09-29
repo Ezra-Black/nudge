@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine:
+    name: Engine (Rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+      - name: Check formatting
+        run: cargo fmt -- --check
+      - name: Lint
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Test
+        run: cargo test --locked
+
+  app:
+    name: App (Swift)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select the newest Xcode 26
+        run: |
+          xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select --switch "$xcode"
+          swift --version
+      - name: Check formatting
+        run: swift format lint --strict --recursive --configuration .swift-format Sources Tests Package.swift
+      - name: Test
+        run: swift test
+      - name: Build Nudge.app
+        run: ./scripts/build.sh
+      - name: Check the app bundle
+        run: |
+          test -x build/Nudge.app/Contents/MacOS/Nudge
+          test -x build/Nudge.app/Contents/MacOS/nudge-engine
+          codesign --verify --deep --strict build/Nudge.app
